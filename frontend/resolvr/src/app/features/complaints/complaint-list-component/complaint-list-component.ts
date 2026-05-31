@@ -1,6 +1,6 @@
 import {Component, inject, signal} from '@angular/core';
 import {ComplaintService} from '../complaint-service';
-import {RouterLink} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {Auth} from '../../../core/auth';
 import {ComplaintResponse, ComplaintStatus, Page} from '../../../core/models/models';
 import {PageHeaderComponent} from '../../../shared/page-header-component/page-header-component';
@@ -24,7 +24,8 @@ import {DatePipe} from '@angular/common';
 })
 export class ComplaintListComponent {
   private readonly complaintSvc = inject(ComplaintService);
-  private readonly router = inject(RouterLink);
+  private readonly router = inject(Router);
+  // private readonly router = inject(RouterLink);
   readonly auth = inject(Auth);
 
   Math = Math;
@@ -56,7 +57,9 @@ export class ComplaintListComponent {
   setPage(page: number) { this.currentPage.set(page); this.load(); }
   setStatus(s: string)  { this.filterStatus.set(s); this.currentPage.set(0); this.load(); }
 
-  navigateTo(id: number) { window.location.href = `/app/complaints/${id}`; }
+  navigateTo(id: number) {
+    this.router.navigate(['/app/complaints', id]);  // ← use router.navigate
+  }
 
   isPastTarget(targetDate: string) {
     return new Date(targetDate) < new Date();

@@ -11,15 +11,14 @@ import {FormsModule} from '@angular/forms';
     ToastContainerComponent,
     RouterLinkActive,
     RouterLink,
-    RouterOutlet,
-    FormsModule
+    RouterOutlet
   ],
   templateUrl: './main-layout-component.html',
   styleUrl: './main-layout-component.css',
 })
 export class MainLayoutComponent {
   readonly auth = inject(Auth);
-  drawerOpen = signal(false);
+  drawerOpen = false;
 
   pageTitle = () => 'Complaint Management';
 
@@ -32,4 +31,12 @@ export class MainLayoutComponent {
     const role = this.auth.currentUser()?.role;
     return role ? ROLE_LABELS[role] : '';
   };
+
+  toggleDrawer() {
+    this.drawerOpen = !this.drawerOpen;
+  }
+
+  closeDrawer() {
+    this.drawerOpen = false;
+  }
 }

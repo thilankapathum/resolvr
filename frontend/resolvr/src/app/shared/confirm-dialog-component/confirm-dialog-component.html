@@ -1,0 +1,19 @@
+<dialog class="modal modal-open">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">{{ title() }}</h3>
+    <p class="py-4 text-base-content/70">{{ message() }}</p>
+    <div class="modal-action">
+      <button class="btn btn-ghost" (click)="cancelled.emit()">Cancel</button>
+      <button
+        class="btn {{ confirmClass() }}"
+        [disabled]="loading()"
+        (click)="confirmed.emit()">
+        @if (loading()) {
+          <span class="loading loading-spinner loading-sm"></span>
+        }
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+  <div class="modal-backdrop" (click)="cancelled.emit()"></div>
+</dialog>

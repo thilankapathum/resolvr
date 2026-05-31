@@ -1,0 +1,46 @@
+<div class="card bg-base-100 shadow-xl border border-base-300">
+  <div class="card-body">
+    <h2 class="card-title text-xl font-bold mb-2">Sign in</h2>
+    <p class="text-base-content/60 text-sm mb-6">Enter your credentials to continue</p>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error mb-4">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-sm">{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div class="form-control">
+        <label class="label"><span class="label-text font-medium">Email</span></label>
+        <input type="email" formControlName="email" placeholder="you@example.com"
+               class="input input-bordered w-full"
+               [class.input-error]="form.get('email')?.invalid && form.get('email')?.touched" />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <label class="label"><span class="label-text-alt text-error">Enter a valid email.</span></label>
+        }
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-medium">Password</span>
+          <a routerLink="/forgot-password" class="label-text-alt link link-primary">Forgot password?</a>
+        </label>
+        <input type="password" formControlName="password" placeholder="••••••••"
+               class="input input-bordered w-full"
+               [class.input-error]="form.get('password')?.invalid && form.get('password')?.touched" />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full mt-2" [disabled]="loading()">
+        @if (loading()) { <span class="loading loading-spinner loading-sm"></span> }
+        Sign In
+      </button>
+    </form>
+
+    <div class="divider text-base-content/30 text-sm">New to Resolvr?</div>
+    <a routerLink="/register" class="btn btn-outline btn-sm w-full">Create an account</a>
+  </div>
+</div>

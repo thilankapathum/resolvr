@@ -1,0 +1,286 @@
+@if (loading()) {
+  <app-loading-spinner-component message="Loading complaint..." />
+} @else if (complaint()) {
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <a routerLink="/app/complaints" class="btn btn-ghost btn-xs">← Back</a>
+          <span class="font-mono text-sm font-bold text-primary">{{ complaint()!.refNumber }}</span>
+          <app-status-badge-component [status]="complaint()!.status" />
+          <app-priority-badge-component [priority]="complaint()!.priority" />
+        </div>
+        <h1 class="text-xl font-bold mt-2">{{ complaint()!.customerName }}</h1>
+        <p class="text-base-content/60 text-sm">
+          {{ complaint()!.districtName }} · {{ complaint()!.issueCategory }} ·
+          Raised by: {{ complaint()!.raisedBy }}
+        </p>
+      </div>
+
+      <!-- Action buttons based on role/status -->
+      <div class="flex gap-2 flex-wrap">
+        @if (canStart()) {
+          <button class="btn btn-primary btn-sm" (click)="startComplaint()">
+            ▶ Start Analysing
+          </button>
+        }
+        @if (canMarkResolved()) {
+          <button class="btn btn-success btn-sm" (click)="showResolveDialog.set(true)">
+            ✓ Mark Resolved
+          </button>
+        }
+        @if (canEscalate()) {
+          <button class="btn btn-accent btn-sm" (click)="showEscalateDialog.set(true)">
+            ↑ Escalate to Engineer
+          </button>
+        }
+        @if (canClose()) {
+          <button class="btn btn-success btn-sm" (click)="showCloseDialog.set(true)">
+            Close Complaint
+          </button>
+        }
+        @if (canReopen()) {
+          <button class="btn btn-warning btn-sm" (click)="showReopenDialog.set(true)">
+            ↩ Re-open
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: details -->
+      <div class="lg:col-span-2 space-y-4">
+
+        <!-- General info card -->
+        <div class="card bg-base-100 border border-base-300">
+          <div class="card-body p-5">
+            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-3">
+              General Information
+            </h3>
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              <div><dt class="text-base-content/50">District</dt><dd class="font-medium">{{ complaint()!.districtName }}</dd></div>
+              <div><dt class="text-base-content/50">Region</dt><dd class="font-medium">{{ complaint()!.regionName ?? '—' }}</dd></div>
+              <div><dt class="text-base-content/50">Created By</dt><dd class="font-medium">{{ complaint()!.createdByName }}</dd></div>
+              <div><dt class="text-base-content/50">Assigned To</dt>
+                <dd class="font-medium">{{ complaint()!.assignedToName ?? 'Unassigned' }}</dd></div>
+              <div><dt class="text-base-content/50">Target Date</dt>
+                <dd class="font-medium" [class.text-error]="isPastTarget()">
+                  {{ complaint()!.targetDate | date:'dd MMM yyyy, HH:mm' }}
+                </dd></div>
+              <div><dt class="text-base-content/50">Created</dt>
+                <dd class="font-medium">{{ complaint()!.createdAt | date:'dd MMM yyyy, HH:mm' }}</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Customer info card -->
+        <div class="card bg-base-100 border border-base-300">
+          <div class="card-body p-5">
+            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-3">
+              Customer Information
+            </h3>
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              <div><dt class="text-base-content/50">Name</dt><dd class="font-medium">{{ complaint()!.customerName }}</dd></div>
+              <div><dt class="text-base-content/50">Contact</dt><dd class="font-medium">{{ complaint()!.contactNumber }}</dd></div>
+              <div class="col-span-2"><dt class="text-base-content/50">MSISDN(s)</dt>
+                <dd class="font-medium font-mono">{{ complaint()!.msisdns }}</dd></div>
+              <div><dt class="text-base-content/50">Issue Category</dt><dd class="font-medium">{{ complaint()!.issueCategory }}</dd></div>
+              <div><dt class="text-base-content/50">Technology</dt><dd class="font-medium">{{ complaint()!.technology ?? '—' }}</dd></div>
+              <div class="col-span-2"><dt class="text-base-content/50">Issue Description</dt>
+                <dd class="font-medium mt-1 p-3 bg-base-200 rounded-lg">{{ complaint()!.issueDescription }}</dd></div>
+              @if (complaint()!.address) {
+                <div class="col-span-2"><dt class="text-base-content/50">Address</dt>
+                  <dd class="font-medium">{{ complaint()!.address }}</dd></div>
+              }
+              @if (complaint()!.latitude) {
+                <div><dt class="text-base-content/50">GPS</dt>
+                  <dd class="font-medium font-mono text-xs">
+                    {{ complaint()!.latitude }}, {{ complaint()!.longitude }}
+                  </dd></div>
+              }
+            </dl>
+          </div>
+        </div>
+
+        <!-- Analysis thread -->
+        @if (complaint()!.status !== 'NOT_ASSIGNED' && complaint()!.status !== 'NOT_STARTED') {
+          <div class="card bg-base-100 border border-base-300">
+            <div class="card-body p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50">Analysis</h3>
+                @if (canAddAnalysis()) {
+                  <button class="btn btn-outline btn-xs" (click)="showAnalysisForm.set(!showAnalysisForm())">
+                    + Add Analysis
+                  </button>
+                }
+              </div>
+
+              @if (complaint()!.analysisEntries.length === 0) {
+                <p class="text-base-content/40 text-sm italic">No analysis entries yet.</p>
+              }
+
+              @for (entry of complaint()!.analysisEntries; track entry.id) {
+                <div class="border-l-2 border-base-300 pl-4 mb-4">
+                  <div class="flex items-center gap-2 text-xs text-base-content/50 mb-1">
+                    <span class="font-semibold text-base-content/70">{{ entry.authorName }}</span>
+                    <span class="badge badge-xs badge-ghost">{{ entry.authorRole }}</span>
+                    <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                    @if (entry.edited) { <span class="badge badge-xs badge-warning">edited</span> }
+                  </div>
+                  <p class="text-sm">{{ entry.content }}</p>
+                </div>
+              }
+
+              @if (showAnalysisForm()) {
+                <form [formGroup]="analysisForm" (ngSubmit)="submitAnalysis()" class="mt-4 space-y-3 border-t border-base-300 pt-4">
+                  <div class="form-control">
+                    <label class="label"><span class="label-text text-xs font-medium">Analysis Content *</span></label>
+                    <textarea formControlName="content" rows="4" placeholder="Describe your analysis findings..."
+                              class="textarea textarea-bordered w-full text-sm"></textarea>
+                  </div>
+                  <div class="form-control">
+                    <label class="label"><span class="label-text text-xs font-medium">Serving Sites / Cells</span></label>
+                    <input type="text" formControlName="servingSitesCells"
+                           class="input input-bordered input-sm w-full" placeholder="e.g. CMB-BTS-001, Cell-A" />
+                  </div>
+                  <div class="form-control">
+                    <label class="label"><span class="label-text text-xs font-medium">Coverage & Quality</span></label>
+                    <input type="text" formControlName="coverageQuality"
+                           class="input input-bordered input-sm w-full" placeholder="e.g. -90 dBm, Good" />
+                  </div>
+                  <div class="flex gap-2 justify-end">
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="showAnalysisForm.set(false)">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="actionLoading()">
+                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+                      Save Analysis
+                    </button>
+                  </div>
+                </form>
+              }
+            </div>
+          </div>
+
+          <!-- Solution thread -->
+          <div class="card bg-base-100 border border-base-300">
+            <div class="card-body p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50">Solution</h3>
+                @if (canAddSolution()) {
+                  <button class="btn btn-outline btn-xs" (click)="showSolutionForm.set(!showSolutionForm())">
+                    + Add Solution
+                  </button>
+                }
+              </div>
+
+              @if (complaint()!.solutionEntries.length === 0) {
+                <p class="text-base-content/40 text-sm italic">No solution entries yet.</p>
+              }
+
+              @for (entry of complaint()!.solutionEntries; track entry.id) {
+                <div class="border-l-2 border-success/40 pl-4 mb-4">
+                  <div class="flex items-center gap-2 text-xs text-base-content/50 mb-1">
+                    <span class="font-semibold text-base-content/70">{{ entry.authorName }}</span>
+                    <span class="badge badge-xs badge-ghost">{{ entry.authorRole }}</span>
+                    <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                    @if (entry.edited) { <span class="badge badge-xs badge-warning">edited</span> }
+                  </div>
+                  <p class="text-sm">{{ entry.content }}</p>
+                  @if (entry.remarks) {
+                    <p class="text-xs text-base-content/50 mt-1">Remarks: {{ entry.remarks }}</p>
+                  }
+                </div>
+              }
+
+              @if (showSolutionForm()) {
+                <form [formGroup]="solutionForm" (ngSubmit)="submitSolution()" class="mt-4 space-y-3 border-t border-base-300 pt-4">
+                  <div class="form-control">
+                    <label class="label"><span class="label-text text-xs font-medium">Solution Details *</span></label>
+                    <textarea formControlName="content" rows="4" placeholder="Describe the solution applied..."
+                              class="textarea textarea-bordered w-full text-sm"></textarea>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="form-control">
+                      <label class="label"><span class="label-text text-xs font-medium">Solution Target Date</span></label>
+                      <input type="date" formControlName="solutionTargetDate"
+                             class="input input-bordered input-sm w-full" />
+                    </div>
+                    <div class="form-control">
+                      <label class="label"><span class="label-text text-xs font-medium">Remarks</span></label>
+                      <input type="text" formControlName="remarks"
+                             class="input input-bordered input-sm w-full" placeholder="Optional remarks" />
+                    </div>
+                  </div>
+                  <div class="flex gap-2 justify-end">
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="showSolutionForm.set(false)">Cancel</button>
+                    <button type="submit" class="btn btn-success btn-sm" [disabled]="actionLoading()">
+                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+                      Save Solution
+                    </button>
+                  </div>
+                </form>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right: audit trail -->
+      <div class="space-y-4">
+        <div class="card bg-base-100 border border-base-300">
+          <div class="card-body p-5">
+            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-4">Audit Trail</h3>
+            <ol class="relative border-l border-base-300 space-y-4">
+              @for (log of complaint()!.auditLogs; track log.id) {
+                <li class="ml-4">
+                  <div class="absolute w-2 h-2 bg-primary rounded-full mt-1.5 -left-1 border border-base-100"></div>
+                  <time class="text-xs text-base-content/40">
+                    {{ log.createdAt | date:'dd MMM, HH:mm' }}
+                  </time>
+                  <p class="text-sm font-semibold text-base-content/80 mt-0.5">
+                    {{ auditLabels[log.action] ?? log.action }}
+                  </p>
+                  <p class="text-xs text-base-content/50">by {{ log.actorName }}</p>
+                  @if (log.notes) {
+                    <p class="text-xs text-base-content/60 mt-1 italic">{{ log.notes }}</p>
+                  }
+                  @if (log.fromStatus && log.toStatus) {
+                    <div class="text-xs text-base-content/40 mt-0.5">
+                      {{ statusLabels[log.fromStatus] }} → {{ statusLabels[log.toStatus] }}
+                    </div>
+                  }
+                </li>
+              }
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialogs -->
+  @if (showResolveDialog()) {
+    <app-confirm-dialog-component
+      title="Mark as Resolved"
+      message="This will mark the complaint as resolved and notify the manager for closure."
+      confirmLabel="Mark Resolved"
+      confirmClass="btn-success"
+      [loading]="actionLoading()"
+      (confirmed)="markResolved()"
+      (cancelled)="showResolveDialog.set(false)" />
+  }
+
+  @if (showCloseDialog()) {
+    <app-confirm-dialog-component
+      title="Close Complaint"
+      message="This will permanently close the complaint. This action cannot be undone."
+      confirmLabel="Close"
+      confirmClass="btn-success"
+      [loading]="actionLoading()"
+      (confirmed)="closeComplaint()"
+      (cancelled)="showCloseDialog.set(false)" />
+  }
+}

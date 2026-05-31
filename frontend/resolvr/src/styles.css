@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global overrides ──────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-sans antialiased;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-base-200; }
+::-webkit-scrollbar-thumb { @apply bg-base-300 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-base-content/30; }
+
+/* Router link active state in sidebar */
+.menu a.active {
+  @apply bg-primary/10 text-primary font-medium;
+}
+
+/* Table row hover */
+.table tbody tr.hover:hover {
+  @apply bg-base-200/60 cursor-pointer;
+}
+
+/* Card defaults */
+.card {
+  @apply rounded-xl;
+}
+
+/* Mono ref number */
+.ref-number {
+  @apply font-mono text-xs font-bold tracking-wide text-primary;
+}
+
+/* Audit trail timeline dot */
+.audit-dot {
+  @apply absolute w-2.5 h-2.5 bg-primary rounded-full -left-1.5 top-1.5 border-2 border-base-100;
+}/* You can add global styles to this file, and also import other style files */

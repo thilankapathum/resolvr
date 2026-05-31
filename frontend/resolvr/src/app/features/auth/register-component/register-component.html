@@ -1,0 +1,82 @@
+<div class="card bg-base-100 shadow-xl border border-base-300">
+  <div class="card-body">
+    @if (!submitted()) {
+      <h2 class="card-title text-xl font-bold mb-2">Create an account</h2>
+      <p class="text-base-content/60 text-sm mb-6">
+        Fill in your details. An admin will activate your account after verification.
+      </p>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mb-4">
+          <span class="text-sm">{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Full Name</span></label>
+          <input type="text" formControlName="fullName" placeholder="John Silva"
+                 class="input input-bordered w-full"
+                 [class.input-error]="isInvalid('fullName')" />
+          @if (isInvalid('fullName')) {
+            <label class="label"><span class="label-text-alt text-error">Full name is required.</span></label>
+          }
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Email</span></label>
+          <input type="email" formControlName="email" placeholder="you@company.com"
+                 class="input input-bordered w-full"
+                 [class.input-error]="isInvalid('email')" />
+          @if (isInvalid('email')) {
+            <label class="label"><span class="label-text-alt text-error">Enter a valid email.</span></label>
+          }
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Password</span></label>
+          <input type="password" formControlName="password" placeholder="Min. 8 characters"
+                 class="input input-bordered w-full"
+                 [class.input-error]="isInvalid('password')" />
+          @if (isInvalid('password')) {
+            <label class="label"><span class="label-text-alt text-error">Password must be at least 8 characters.</span></label>
+          }
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Confirm Password</span></label>
+          <input type="password" formControlName="confirmPassword" placeholder="Repeat password"
+                 class="input input-bordered w-full"
+                 [class.input-error]="form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched" />
+          @if (form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched) {
+            <label class="label"><span class="label-text-alt text-error">Passwords do not match.</span></label>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full mt-2" [disabled]="loading()">
+          @if (loading()) { <span class="loading loading-spinner loading-sm"></span> }
+          Create Account
+        </button>
+      </form>
+
+      <div class="text-center mt-4 text-sm">
+        Already have an account? <a routerLink="/login" class="link link-primary">Sign in</a>
+      </div>
+    } @else {
+      <!-- Success state -->
+      <div class="text-center py-4">
+        <div class="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold mb-2">Check your email</h2>
+        <p class="text-base-content/60 text-sm">
+          A verification link has been sent to <strong>{{ form.value.email }}</strong>.
+          After verifying, an administrator will review and activate your account.
+        </p>
+        <a routerLink="/login" class="btn btn-primary btn-sm mt-6">Back to Sign In</a>
+      </div>
+    }
+  </div>
+</div>

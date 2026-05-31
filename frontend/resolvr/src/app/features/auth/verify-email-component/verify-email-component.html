@@ -1,0 +1,29 @@
+<div class="card bg-base-100 shadow-xl border border-base-300">
+  <div class="card-body text-center">
+    @if (loading()) {
+      <span class="loading loading-spinner loading-lg text-primary mx-auto"></span>
+      <p class="mt-4 text-base-content/60">Verifying your email...</p>
+    } @else if (success()) {
+      <div class="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold">Email Verified!</h2>
+      <p class="text-base-content/60 text-sm mt-2">
+        Your email has been verified. An admin will activate your account shortly.
+      </p>
+      <a routerLink="/login" class="btn btn-primary btn-sm mt-6">Back to Sign In</a>
+    } @else {
+      <div class="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold">Verification Failed</h2>
+      <p class="text-base-content/60 text-sm mt-2">{{ errorMessage() }}</p>
+      <a routerLink="/login" class="btn btn-outline btn-sm mt-6">Back to Sign In</a>
+    }
+  </div>
+</div>

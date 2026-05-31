@@ -1,0 +1,118 @@
+<app-page-header-component title="Regions & Districts" subtitle="Organise Sri Lanka's 25 districts into regions" />
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Regions panel -->
+  <div class="card bg-base-100 border border-base-300">
+    <div class="card-body p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">Regions</h3>
+        <button class="btn btn-primary btn-xs" (click)="showNewRegionForm.set(!showNewRegionForm())">
+          + New Region
+        </button>
+      </div>
+
+      @if (showNewRegionForm()) {
+        <form [formGroup]="regionForm" (ngSubmit)="createRegion()" class="flex gap-2 mb-4">
+          <input type="text" formControlName="name" placeholder="Region name"
+                 class="input input-bordered input-sm flex-1" />
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="actionLoading()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+            Save
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="showNewRegionForm.set(false)">✕</button>
+        </form>
+      }
+
+      @if (loading()) {
+        <app-loading-spinner-component />
+      } @else {
+        <div class="space-y-2">
+          @for (region of regions(); track region.id) {
+            <div class="border border-base-300 rounded-lg p-3 cursor-pointer"
+                 [class.border-primary]="selectedRegion()?.id === region.id"
+                 [class.bg-primary]="selectedRegion()?.id === region.id"
+              (click)="selectRegion(region)">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium text-sm">{{ region.name }}</span>
+                <span class="text-xs text-base-content/50 ml-2">{{ region.districts.length }} districts</span>
+              </div>
+              <button class="btn btn-ghost btn-xs text-error"
+                      (click)="$event.stopPropagation(); confirmDeleteRegion(region)">✕</button>
+            </div>
+            @if (selectedRegion()?.id === region.id && region.districts.length) {
+              <div class="flex flex-wrap gap-1 mt-2">
+                @for (d of region.districts; track d.id) {
+                  <span class="badge badge-xs badge-outline">{{ d.name }}</span>
+                }
+              </div>
+            }
+            </div>
+          }
+          @if (!regions().length) {
+            <p class="text-base-content/40 text-sm text-center py-6">No regions yet. Create one to get started.</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Districts panel -->
+  <div class="card bg-base-100 border border-base-300">
+    <div class="card-body p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">Assign Districts</h3>
+        @if (selectedRegion()) {
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-primary font-medium">→ {{ selectedRegion()!.name }}</span>
+            <button class="btn btn-primary btn-xs" [disabled]="!selectedDistricts().size || actionLoading()"
+                    (click)="assignDistricts()">
+              @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+              Assign Selected
+            </button>
+          </div>
+        } @else {
+          <span class="text-xs text-base-content/40">Select a region first</span>
+        }
+      </div>
+
+      @if (!selectedRegion()) {
+        <div class="text-center py-10 text-base-content/40 text-sm">
+          Click a region on the left to assign districts to it.
+        </div>
+      } @else {
+        <div class="mb-3">
+          <p class="text-xs text-base-content/50">Select districts to assign to <strong>{{ selectedRegion()!.name }}</strong>:</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto pr-1">
+          @for (d of allDistricts(); track d.id) {
+            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-base-200 text-sm">
+              <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
+                     [checked]="selectedDistricts().has(d.id)"
+                     [disabled]="d.regionId !== null && d.regionId !== selectedRegion()!.id"
+                     (change)="toggleDistrict(d.id, $event)" />
+              <span [class.text-base-content]="d.regionId !== null && d.regionId !== selectedRegion()!.id">
+              {{ d.name }}
+              @if (d.regionId !== null && d.regionId !== selectedRegion()!.id) {
+                <span class="text-xs">({{ d.regionName }})</span>
+              }
+              </span>
+            </label>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (showDeleteRegionDialog()) {
+  <app-confirm-dialog-component
+    title="Delete Region"
+    [message]="'Delete region &quot;' + deletingRegion()?.name + '&quot;? Districts will be unassigned.'"
+    confirmLabel="Delete"
+    confirmClass="btn-error"
+    [loading]="actionLoading()"
+    (confirmed)="deleteRegion()"
+    (cancelled)="showDeleteRegionDialog.set(false)" />
+}

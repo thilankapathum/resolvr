@@ -1,0 +1,103 @@
+@if (loading()) {
+  <app-loading-spinner-component />
+} @else if (user()) {
+  <div class="max-w-3xl mx-auto space-y-6">
+    <!-- Back + name -->
+    <div>
+      <a routerLink="/app/admin/users" class="btn btn-ghost btn-xs mb-3">← Back to Users</a>
+      <h1 class="text-xl font-bold">{{ user()!.fullName }}</h1>
+      <p class="text-base-content/60 text-sm">{{ user()!.email }}</p>
+    </div>
+
+    <!-- Status badges -->
+    <div class="flex gap-2 flex-wrap">
+      @if (user()!.active) {
+        <span class="badge badge-success">Active</span>
+      } @else {
+        <span class="badge badge-warning">Inactive</span>
+      }
+      @if (user()!.role) {
+        <span class="badge badge-outline">{{ roleLabels[user()!.role!] }}</span>
+      }
+      @if (user()!.regionName) {
+        <span class="badge badge-ghost">{{ user()!.regionName }}</span>
+      }
+    </div>
+
+    <!-- Role & Region -->
+    <div class="card bg-base-100 border border-base-300">
+      <div class="card-body p-5">
+        <h3 class="font-semibold mb-4">Role & Region</h3>
+        <form [formGroup]="roleForm" (ngSubmit)="updateRole()" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Role</span></label>
+              <select formControlName="role" class="select select-bordered w-full">
+                <option value="TECHNICAL_OFFICER">Technical Officer</option>
+                <option value="ENGINEER">Engineer</option>
+                <option value="MANAGER">Manager</option>
+                <option value="HEAD">Head</option>
+              </select>
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Region</span></label>
+              <select formControlName="regionId" class="select select-bordered w-full">
+                <option value="">No region</option>
+                @for (r of regions(); track r.id) {
+                  <option [value]="r.id">{{ r.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="actionLoading()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+            Update Role & Region
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- District assignment (TO / Engineer only) -->
+    @if (user()!.role === 'TECHNICAL_OFFICER' || user()!.role === 'ENGINEER') {
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body p-5">
+          <h3 class="font-semibold mb-1">District Assignments</h3>
+          <p class="text-xs text-base-content/50 mb-4">Select districts this user is responsible for</p>
+          <div class="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+            @for (d of allDistricts(); track d.id) {
+              <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-base-200 text-sm">
+                <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
+                       [checked]="assignedDistrictIds().has(d.id)"
+                       (change)="toggleDistrict(d.id, $event)" />
+                <span>{{ d.name }}</span>
+              </label>
+            }
+          </div>
+          <button class="btn btn-outline btn-sm mt-4 w-fit" [disabled]="actionLoading()"
+                  (click)="saveDistricts()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+            Save Districts
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Password reset -->
+    <div class="card bg-base-100 border border-base-300">
+      <div class="card-body p-5">
+        <h3 class="font-semibold mb-4">Reset Password</h3>
+        <form [formGroup]="passwordForm" (ngSubmit)="resetPassword()" class="space-y-3">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-medium">New Password</span></label>
+            <input type="password" formControlName="newPassword" placeholder="Min. 8 characters"
+                   class="input input-bordered w-full" />
+          </div>
+          <button type="submit" class="btn btn-warning btn-sm" [disabled]="actionLoading()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+            Reset Password
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+}

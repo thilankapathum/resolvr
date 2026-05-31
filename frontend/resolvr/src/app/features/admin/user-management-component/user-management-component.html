@@ -1,0 +1,122 @@
+<app-page-header-component title="User Management" subtitle="Activate, assign roles and manage team members" />
+
+<!-- Filter tabs -->
+<div class="tabs tabs-boxed bg-base-200 mb-4 p-1">
+  <button class="tab tab-sm" [class.tab-active]="activeTab() === 'all'" (click)="activeTab.set('all')">All Users</button>
+  <button class="tab tab-sm" [class.tab-active]="activeTab() === 'pending'" (click)="activeTab.set('pending')">
+    Pending Activation
+    @if (pendingCount() > 0) { <span class="badge badge-sm badge-warning ml-2">{{ pendingCount() }}</span> }
+  </button>
+</div>
+
+@if (loading()) {
+  <app-loading-spinner-component />
+} @else {
+  <div class="card bg-base-100 border border-base-300 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead class="bg-base-200 text-base-content/60">
+        <tr>
+          <th>Name</th><th>Email</th><th>Role</th><th>Region</th>
+          <th>Status</th><th>Joined</th><th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (user of filteredUsers(); track user.id) {
+            <tr class="hover">
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar placeholder">
+                    <div class="bg-primary/10 text-primary rounded-full w-8">
+                      <span class="text-xs font-bold">{{ initials(user) }}</span>
+                    </div>
+                  </div>
+                  <span class="font-medium text-sm">{{ user.fullName }}</span>
+                </div>
+              </td>
+              <td class="text-sm text-base-content/70">{{ user.email }}</td>
+              <td>
+                @if (user.role) {
+                  <span class="badge badge-sm badge-outline">{{ roleLabels[user.role] }}</span>
+                } @else {
+                  <span class="text-base-content/40 text-xs">Not assigned</span>
+                }
+              </td>
+              <td class="text-sm text-base-content/70">{{ user.regionName ?? '—' }}</td>
+              <td>
+                @if (user.active) {
+                  <span class="badge badge-sm badge-success">Active</span>
+                } @else if (user.emailVerified) {
+                  <span class="badge badge-sm badge-warning">Pending Activation</span>
+                } @else {
+                  <span class="badge badge-sm badge-ghost">Email Unverified</span>
+                }
+              </td>
+              <td class="text-xs text-base-content/50">{{ user.createdAt | date:'dd MMM yyyy' }}</td>
+              <td>
+                <div class="flex gap-1">
+                  <a [routerLink]="['/app/admin/users', user.id]" class="btn btn-ghost btn-xs">Manage</a>
+                  @if (!user.active && user.emailVerified) {
+                    <button class="btn btn-primary btn-xs" (click)="openActivateModal(user)">Activate</button>
+                  }
+                  @if (user.active) {
+                    <button class="btn btn-ghost btn-xs text-error" (click)="confirmDeactivate(user)">Deactivate</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Activate modal -->
+@if (showActivateModal()) {
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-4">Activate {{ activatingUser()?.fullName }}</h3>
+      <form [formGroup]="activateForm" (ngSubmit)="activateUser()" class="space-y-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Assign Role *</span></label>
+          <select formControlName="role" class="select select-bordered w-full">
+            <option value="">Select role...</option>
+            <option value="TECHNICAL_OFFICER">Technical Officer</option>
+            <option value="ENGINEER">Engineer</option>
+            <option value="MANAGER">Manager</option>
+            <option value="HEAD">Head</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text font-medium">Assign Region *</span></label>
+          <select formControlName="regionId" class="select select-bordered w-full">
+            <option value="">Select region...</option>
+            @for (r of regions(); track r.id) {
+              <option [value]="r.id">{{ r.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost" (click)="showActivateModal.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="actionLoading()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-sm"></span> }
+            Activate User
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="modal-backdrop" (click)="showActivateModal.set(false)"></div>
+  </div>
+}
+
+@if (showDeactivateDialog()) {
+  <app-confirm-dialog-component
+    title="Deactivate User"
+    [message]="'Are you sure you want to deactivate ' + deactivatingUser()?.fullName + '? They will be signed out immediately.'"
+    confirmLabel="Deactivate"
+    confirmClass="btn-error"
+    [loading]="actionLoading()"
+    (confirmed)="deactivateUser()"
+    (cancelled)="showDeactivateDialog.set(false)" />
+}

@@ -1,0 +1,403 @@
+<div class="max-w-4xl mx-auto">
+  <app-page-header-component title="Log New Complaint" subtitle="Fields marked * are required">
+    <a routerLink="/app/complaints" class="btn btn-ghost btn-sm">Cancel</a>
+  </app-page-header-component>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- Step tabs -->
+    <div class="tabs tabs-bordered mb-6">
+      <button type="button" class="tab" [class.tab-active]="step() === 0" (click)="step.set(0)">
+        General
+      </button>
+      <button type="button" class="tab" [class.tab-active]="step() === 1" (click)="step.set(1)">
+        Customer Info
+      </button>
+      <button type="button" class="tab" [class.tab-active]="step() === 2" (click)="step.set(2)">
+        Device Info
+      </button>
+    </div>
+
+    <!-- ── Section 0: General ─────────────────────────────── -->
+    @if (step() === 0) {
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body p-6 space-y-4">
+          <h3 class="font-semibold text-base-content/70 text-sm uppercase tracking-wide mb-2">
+            General Information
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">District *</span></label>
+              <select formControlName="districtId" class="select select-bordered w-full"
+                      [class.select-error]="isInvalid('districtId')">
+                <option value="">Select district...</option>
+                @for (d of districts(); track d.id) {
+                  <option [value]="d.id">{{ d.name }} ({{ d.code }})</option>
+                }
+              </select>
+              @if (isInvalid('districtId')) {
+                <label class="label"><span class="label-text-alt text-error">District is required.</span></label>
+              }
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Raised By *</span></label>
+              <input type="text" formControlName="raisedBy"
+                     placeholder="Company employee who raised the complaint"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('raisedBy')" />
+              @if (isInvalid('raisedBy')) {
+                <label class="label"><span class="label-text-alt text-error">Required.</span></label>
+              }
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Priority *</span></label>
+              <select formControlName="priority" class="select select-bordered w-full"
+                      [class.select-error]="isInvalid('priority')">
+                <option value="">Select priority...</option>
+                <option value="LOW">Low — 72h target</option>
+                <option value="MEDIUM">Medium — 48h target</option>
+                <option value="HIGH">High — 24h target</option>
+              </select>
+              @if (isInvalid('priority')) {
+                <label class="label"><span class="label-text-alt text-error">Required.</span></label>
+              }
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Assign To (optional)</span></label>
+              <select formControlName="assignedToId" class="select select-bordered w-full">
+                <option value="">Leave unassigned</option>
+                @for (u of assignableUsers(); track u.id) {
+                  <option [value]="u.id">{{ u.fullName }} ({{ u.role ? ROLE_LABELS[u.role] : '' }})</option>
+                }
+              </select>
+            </div>
+
+          </div>
+
+          <div class="flex justify-end mt-4">
+            <button type="button" class="btn btn-primary btn-sm" (click)="step.set(1)">
+              Next: Customer Info →
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Section 1: Customer Info ───────────────────────── -->
+    @if (step() === 1) {
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body p-6 space-y-4">
+          <h3 class="font-semibold text-base-content/70 text-sm uppercase tracking-wide mb-2">
+            Customer Information
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Customer Name *</span></label>
+              <input type="text" formControlName="customerName" placeholder="Full name"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('customerName')" />
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Contact Number *</span></label>
+              <input type="tel" formControlName="contactNumber" placeholder="077XXXXXXX"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('contactNumber')" />
+            </div>
+
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text font-medium">Affected MSISDN(s) *</span></label>
+              <input type="text" formControlName="msisdns"
+                     placeholder="e.g. 0771234567, 0781234567 (comma separated)"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('msisdns')" />
+              <label class="label cursor-pointer justify-start gap-3 pt-1">
+                <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
+                       [checked]="sameAsContact()"
+                       (change)="toggleSameAsContact($event)" />
+                <span class="label-text text-sm text-base-content/70">Same as contact number</span>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Issue Category *</span></label>
+              <select formControlName="issueCategory" class="select select-bordered w-full"
+                      [class.select-error]="isInvalid('issueCategory')">
+                <option value="">Select category...</option>
+                <option value="DATA">Data</option>
+                <option value="VOICE">Voice</option>
+                <option value="VOICE_AND_DATA">Voice & Data</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Technology</span></label>
+              <select formControlName="technology" class="select select-bordered w-full">
+                <option value="">Not specified</option>
+                <option value="G2">2G</option>
+                <option value="G3">3G</option>
+                <option value="G4">4G</option>
+                <option value="G5">5G</option>
+              </select>
+            </div>
+
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text font-medium">Issue Description *</span></label>
+              <textarea formControlName="issueDescription" rows="3"
+                        placeholder="Describe the issue in detail..."
+                        class="textarea textarea-bordered w-full"
+                        [class.textarea-error]="isInvalid('issueDescription')"></textarea>
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Issue Duration</span></label>
+              <input type="text" formControlName="issueDuration"
+                     placeholder="e.g. 3 days, since last Monday"
+                     class="input input-bordered w-full" />
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Last Experienced Date</span></label>
+              <input type="date" formControlName="lastExperienced" class="input input-bordered w-full" />
+            </div>
+
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text font-medium">Address</span></label>
+              <input type="text" formControlName="address"
+                     placeholder="Street address"
+                     class="input input-bordered w-full" />
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Latitude *</span></label>
+              <input type="number" formControlName="latitude" step="0.0000001"
+                     placeholder="e.g. 6.9271"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('latitude')" />
+              @if (isInvalid('latitude')) {
+                <label class="label"><span class="label-text-alt text-error">Latitude is required.</span></label>
+              }
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Longitude *</span></label>
+              <input type="number" formControlName="longitude" step="0.0000001"
+                     placeholder="e.g. 79.8612"
+                     class="input input-bordered w-full"
+                     [class.input-error]="isInvalid('longitude')" />
+              @if (isInvalid('longitude')) {
+                <label class="label"><span class="label-text-alt text-error">Longitude is required.</span></label>
+              }
+            </div>
+
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text font-medium">Additional Information</span></label>
+              <textarea formControlName="additionalInfo" rows="2"
+                        placeholder="Any other relevant information..."
+                        class="textarea textarea-bordered w-full"></textarea>
+            </div>
+
+          </div>
+
+          <div class="flex justify-between mt-4">
+            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(0)">← Back</button>
+            <button type="button" class="btn btn-primary btn-sm" (click)="step.set(2)">
+              Next: Device Info →
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Section 2: Device Info ─────────────────────────── -->
+    @if (step() === 2) {
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body p-6 space-y-4">
+          <h3 class="font-semibold text-base-content/70 text-sm uppercase tracking-wide mb-2">
+            Device Information <span class="text-base-content/40 font-normal normal-case text-xs">(optional)</span>
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Device Type</span></label>
+              <select formControlName="deviceType" class="select select-bordered w-full">
+                <option value="">Not specified</option>
+                <option value="PHONE">Phone</option>
+                <option value="DONGLE">Dongle</option>
+                <option value="ROUTER">Router</option>
+                <option value="IOT">IoT</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Signal Bars (0–5)</span></label>
+              <input type="number" formControlName="signalBars" min="0" max="5"
+                     placeholder="e.g. 2"
+                     class="input input-bordered w-full" />
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-medium">Using VPN / Custom APN?</span></label>
+              <select formControlName="usingVpnApn" class="select select-bordered w-full">
+                <option value="">Unknown</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Summary before submit -->
+          <div class="divider text-base-content/30">Review & Submit</div>
+
+          <div class="bg-base-200 rounded-xl p-4 space-y-4 text-sm">
+
+            <!-- General -->
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">General</p>
+              <dl class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">District</dt>
+                  <dd class="font-medium truncate">{{ selectedDistrictName() }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Priority</dt>
+                  <dd class="font-medium">{{ form.getRawValue().priority || '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Raised By</dt>
+                  <dd class="font-medium truncate">{{ form.getRawValue().raisedBy || '—' }}</dd>
+                </div>
+                @if (form.getRawValue().assignedToId) {
+                  <div class="flex gap-2">
+                    <dt class="text-base-content/50 shrink-0">Assigned To</dt>
+                    <dd class="font-medium truncate">{{ assignedUserName() }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+
+            <div class="border-t border-base-300"></div>
+
+            <!-- Customer -->
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Customer</p>
+              <dl class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Name</dt>
+                  <dd class="font-medium truncate">{{ form.getRawValue().customerName || '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Contact</dt>
+                  <dd class="font-medium">{{ form.getRawValue().contactNumber || '—' }}</dd>
+                </div>
+                <div class="flex gap-2 col-span-2">
+                  <dt class="text-base-content/50 shrink-0">MSISDN(s)</dt>
+                  <dd class="font-medium font-mono">{{ form.getRawValue().msisdns || '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Category</dt>
+                  <dd class="font-medium">{{ form.getRawValue().issueCategory || '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Technology</dt>
+                  <dd class="font-medium">{{ form.getRawValue().technology || '—' }}</dd>
+                </div>
+                <div class="flex gap-2 col-span-2">
+                  <dt class="text-base-content/50 shrink-0">Description</dt>
+                  <dd class="font-medium">{{ form.getRawValue().issueDescription || '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Latitude</dt>
+                  <dd class="font-medium font-mono">{{ form.getRawValue().latitude ?? '—' }}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-base-content/50 shrink-0">Longitude</dt>
+                  <dd class="font-medium font-mono">{{ form.getRawValue().longitude ?? '—' }}</dd>
+                </div>
+                @if (form.getRawValue().address) {
+                  <div class="flex gap-2 col-span-2">
+                    <dt class="text-base-content/50 shrink-0">Address</dt>
+                    <dd class="font-medium">{{ form.getRawValue().address }}</dd>
+                  </div>
+                }
+                @if (form.getRawValue().issueDuration) {
+                  <div class="flex gap-2">
+                    <dt class="text-base-content/50 shrink-0">Duration</dt>
+                    <dd class="font-medium">{{ form.getRawValue().issueDuration }}</dd>
+                  </div>
+                }
+                @if (form.getRawValue().lastExperienced) {
+                  <div class="flex gap-2">
+                    <dt class="text-base-content/50 shrink-0">Last Experienced</dt>
+                    <dd class="font-medium">{{ form.getRawValue().lastExperienced }}</dd>
+                  </div>
+                }
+                @if (form.getRawValue().additionalInfo) {
+                  <div class="flex gap-2 col-span-2">
+                    <dt class="text-base-content/50 shrink-0">Additional Info</dt>
+                    <dd class="font-medium">{{ form.getRawValue().additionalInfo }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+
+            <!-- Device — only show section if any device field was filled -->
+            @if (form.getRawValue().deviceType || form.getRawValue().signalBars != null || form.getRawValue().usingVpnApn !== '') {
+              <div class="border-t border-base-300"></div>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Device</p>
+                <dl class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                  @if (form.getRawValue().deviceType) {
+                    <div class="flex gap-2">
+                      <dt class="text-base-content/50 shrink-0">Device Type</dt>
+                      <dd class="font-medium">{{ form.getRawValue().deviceType }}</dd>
+                    </div>
+                  }
+                  @if (form.getRawValue().signalBars != null) {
+                    <div class="flex gap-2">
+                      <dt class="text-base-content/50 shrink-0">Signal Bars</dt>
+                      <dd class="font-medium">{{ form.getRawValue().signalBars }} / 5</dd>
+                    </div>
+                  }
+                  @if (form.getRawValue().usingVpnApn !== '') {
+                    <div class="flex gap-2">
+                      <dt class="text-base-content/50 shrink-0">VPN / APN</dt>
+                      <dd class="font-medium">{{ form.getRawValue().usingVpnApn === 'true' ? 'Yes' : 'No' }}</dd>
+                    </div>
+                  }
+                </dl>
+              </div>
+            }
+
+          </div>
+
+          @if (submitError()) {
+            <div class="alert alert-error">
+              <span class="text-sm">{{ submitError() }}</span>
+            </div>
+          }
+
+          <div class="flex justify-between mt-4">
+            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(1)">← Back</button>
+            <button type="submit" class="btn btn-primary" [disabled]="loading()">
+              @if (loading()) { <span class="loading loading-spinner loading-sm"></span> }
+              Submit Complaint
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+  </form>
+</div>

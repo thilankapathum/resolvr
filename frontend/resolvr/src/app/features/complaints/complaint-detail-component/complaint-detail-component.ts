@@ -1,15 +1,16 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ComplaintService} from '../complaint-service';
 import {Auth} from '../../../core/auth';
 import { ToastService } from "../../../shared/toast-service";
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {AUDIT_ACTION_LABELS, ComplaintResponse, STATUS_LABELS} from '../../../core/models/models';
+import {AUDIT_ACTION_LABELS, ComplaintResponse, STATUS_LABELS, UserResponse} from '../../../core/models/models';
 import {ConfirmDialogComponent} from '../../../shared/confirm-dialog-component/confirm-dialog-component';
 import {DatePipe} from '@angular/common';
 import {LoadingSpinnerComponent} from '../../../shared/loading-spinner-component/loading-spinner-component';
 import {StatusBadgeComponent} from '../../../shared/status-badge-component/status-badge-component';
 import {PriorityBadgeComponent} from '../../../shared/priority-badge-component/priority-badge-component';
+import {UserService} from '../../admin/user-service';
 
 @Component({
   selector: 'app-complaint-detail-component',
@@ -31,10 +32,26 @@ export class ComplaintDetailComponent {
   private readonly auth          = inject(Auth);
   private readonly toast         = inject(ToastService);
   private readonly fb            = inject(FormBuilder);
+  private readonly userSvc = inject(UserService);
 
   loading        = signal(true);
   actionLoading  = signal(false);
   complaint      = signal<ComplaintResponse | null>(null);
+
+  availableEngineers = signal<UserResponse[]>([]);
+  selectedEngineerId = signal<number | null>(null);
+  escalateNotes = signal<string>('');
+
+  reopenAssigneeId = signal<number | null>(null);
+  reopenNotes      = signal<string>('');
+  availableAssignees = signal<UserResponse[]>([]);
+
+  // Reverses the audit logs to show the most recent at the top
+  sortedAuditLogs = computed(() => {
+    const logs = this.complaint()?.auditLogs;
+    if (!logs) return [];
+    return [...logs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  });
 
   showAnalysisForm   = signal(false);
   showSolutionForm   = signal(false);
@@ -130,6 +147,79 @@ export class ComplaintDetailComponent {
     this.complaintSvc.closeComplaint(this.id).subscribe({
       next: c  => { this.complaint.set(c); this.actionLoading.set(false); this.showCloseDialog.set(false); this.toast.success('Complaint closed.'); },
       error: e => { this.actionLoading.set(false); this.toast.error(e.error?.message ?? 'Action failed.'); },
+    });
+  }
+
+  openEscalateDialog() {
+    const districtId = this.complaint()?.districtId;
+    if (!districtId) return;
+
+    // Load engineers for this complaint's district
+    this.userSvc.getAssigners(districtId).subscribe({
+      next: users => {
+        // Filter to engineers only
+        const engineers = users.filter(u => u.role === 'ENGINEER');
+        this.availableEngineers.set(engineers);
+        this.selectedEngineerId.set(null);
+        this.escalateNotes.set('');
+        this.showEscalateDialog.set(true);
+      },
+      error: () => this.toast.error('Failed to load engineers for this district.'),
+    });
+  }
+
+  escalateToEngineer() {
+    const engineerId = this.selectedEngineerId();
+    if (!engineerId) {
+      this.toast.error('Please select an engineer.');
+      return;
+    }
+    this.actionLoading.set(true);
+    this.complaintSvc.escalateToEngineer(this.id, engineerId, this.escalateNotes()).subscribe({
+      next: c  => {
+        this.complaint.set(c);
+        this.actionLoading.set(false);
+        this.showEscalateDialog.set(false);
+        this.toast.success('Complaint escalated to engineer.');
+      },
+      error: e => {
+        this.actionLoading.set(false);
+        this.toast.error(e.error?.message ?? 'Escalation failed.');
+      },
+    });
+  }
+
+  openReopenDialog() {
+    const districtId = this.complaint()?.districtId;
+    if (districtId) {
+      this.userSvc.getAssigners(districtId).subscribe({
+        next: users => this.availableAssignees.set(users),
+      });
+    }
+    this.reopenAssigneeId.set(null);
+    this.reopenNotes.set('');
+    this.showReopenDialog.set(true);
+  }
+
+  reopenComplaint() {
+    const assignedToId = this.reopenAssigneeId();
+    const notes = this.reopenNotes();
+    if (!assignedToId || !notes) {
+      this.toast.error('Please select an assignee and provide a reason.');
+      return;
+    }
+    this.actionLoading.set(true);
+    this.complaintSvc.reopenComplaint(this.id, assignedToId, notes).subscribe({
+      next: c => {
+        this.complaint.set(c);
+        this.actionLoading.set(false);
+        this.showReopenDialog.set(false);
+        this.toast.success('Complaint re-opened and re-assigned.');
+      },
+      error: e => {
+        this.actionLoading.set(false);
+        this.toast.error(e.error?.message ?? 'Failed to re-open complaint.');
+      },
     });
   }
 }

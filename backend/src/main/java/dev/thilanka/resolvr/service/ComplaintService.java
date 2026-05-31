@@ -42,7 +42,7 @@ public class ComplaintService {
                 .orElseThrow(() -> new ResourceNotFoundException("District", request.districtId()));
 
         // Validate actor can create for this district
-        validateUserCanActOnDistrict(currentUser, district);
+//        validateUserCanActOnDistrict(currentUser, district);
 
         LocalDateTime now = LocalDateTime.now();
         String refNumber = generateRefNumber(district, now);

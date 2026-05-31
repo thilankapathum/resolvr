@@ -1,162 +1,194 @@
 @if (loading()) {
   <app-loading-spinner-component message="Loading complaint..." />
 } @else if (complaint()) {
-  <div class="max-w-5xl mx-auto space-y-6">
+  <div class="max-w-6xl mx-auto space-y-5 py-4">
 
-    <!-- Header -->
-    <div class="flex items-start justify-between flex-wrap gap-4">
-      <div>
-        <div class="flex items-center gap-3 flex-wrap">
-          <a routerLink="/app/complaints" class="btn btn-ghost btn-xs">← Back</a>
-          <span class="font-mono text-sm font-bold text-primary">{{ complaint()!.refNumber }}</span>
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-base-300 pb-4">
+      <div class="space-y-2">
+        <div class="flex items-center gap-3">
+          <a routerLink="/app/complaints" class="btn btn-ghost btn-xs text-base-content/60 hover:text-primary pl-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" /></svg>
+            Back
+          </a>
+          <span class="ref-number">{{ complaint()!.refNumber }}</span>
           <app-status-badge-component [status]="complaint()!.status" />
           <app-priority-badge-component [priority]="complaint()!.priority" />
         </div>
-        <h1 class="text-xl font-bold mt-2">{{ complaint()!.customerName }}</h1>
-        <p class="text-base-content/60 text-sm">
-          {{ complaint()!.districtName }} · {{ complaint()!.issueCategory }} ·
-          Raised by: {{ complaint()!.raisedBy }}
-        </p>
+
+        <h1 class="text-2xl font-bold text-base-content tracking-tight">{{ complaint()!.customerName }}</h1>
+
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral font-medium">
+          <span class="badge badge-neutral badge-outline badge-sm border-base-300 font-bold">{{ complaint()!.issueCategory }}</span>
+          <span class="text-base-content/50">&bull;</span>
+          <span class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.572l.06.031a1.532 1.532 0 00.022.01zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+            {{ complaint()!.districtName }} ({{ complaint()!.districtCode }})
+          </span>
+          <span class="text-base-content/50">&bull;</span>
+          <span class="flex items-center gap-1 text-sm tracking-tight">
+            {{ complaint()!.contactNumber }}
+          </span>
+          <span class="text-base-content/50">&bull;</span>
+          <span class="flex items-center gap-1 text-sm tracking-tight text-accent">
+            {{ complaint()!.latitude }}, {{ complaint()!.longitude }}
+          </span>
+        </div>
       </div>
 
-      <!-- Action buttons based on role/status -->
-      <div class="flex gap-2 flex-wrap">
+      <div class="flex gap-2 flex-wrap items-center">
         @if (canStart()) {
           <button class="btn btn-primary btn-sm" (click)="startComplaint()">
-            ▶ Start Analysing
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+            Start Analysing
           </button>
         }
         @if (canMarkResolved()) {
-          <button class="btn btn-success btn-sm" (click)="showResolveDialog.set(true)">
-            ✓ Mark Resolved
-          </button>
+          <button class="btn btn-success btn-sm" (click)="showResolveDialog.set(true)">✓ Mark Resolved</button>
         }
         @if (canEscalate()) {
-          <button class="btn btn-accent btn-sm" (click)="showEscalateDialog.set(true)">
+          <button class="btn btn-accent btn-sm" (click)="openEscalateDialog()">
             ↑ Escalate to Engineer
           </button>
         }
         @if (canClose()) {
-          <button class="btn btn-success btn-sm" (click)="showCloseDialog.set(true)">
-            Close Complaint
-          </button>
+          <button class="btn btn-neutral btn-sm" (click)="showCloseDialog.set(true)">Close Complaint</button>
         }
         @if (canReopen()) {
-          <button class="btn btn-warning btn-sm" (click)="showReopenDialog.set(true)">
-            ↩ Re-open
-          </button>
+          <button class="btn btn-warning btn-sm" (click)="openReopenDialog()">↩ Re-open</button>
         }
       </div>
     </div>
 
-    <!-- Main grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
-      <!-- Left: details -->
-      <div class="lg:col-span-2 space-y-4">
+      <div class="lg:col-span-2 space-y-5">
 
-        <!-- General info card -->
         <div class="card bg-base-100 border border-base-300">
           <div class="card-body p-5">
-            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-3">
-              General Information
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-4 flex items-center gap-2 border-b border-base-200 pb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+              Customer & Issue Information
             </h3>
-            <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              <div><dt class="text-base-content/50">District</dt><dd class="font-medium">{{ complaint()!.districtName }}</dd></div>
-              <div><dt class="text-base-content/50">Region</dt><dd class="font-medium">{{ complaint()!.regionName ?? '—' }}</dd></div>
-              <div><dt class="text-base-content/50">Created By</dt><dd class="font-medium">{{ complaint()!.createdByName }}</dd></div>
-              <div><dt class="text-base-content/50">Assigned To</dt>
-                <dd class="font-medium">{{ complaint()!.assignedToName ?? 'Unassigned' }}</dd></div>
-              <div><dt class="text-base-content/50">Target Date</dt>
-                <dd class="font-medium" [class.text-error]="isPastTarget()">
-                  {{ complaint()!.targetDate | date:'dd MMM yyyy, HH:mm' }}
-                </dd></div>
-              <div><dt class="text-base-content/50">Created</dt>
-                <dd class="font-medium">{{ complaint()!.createdAt | date:'dd MMM yyyy, HH:mm' }}</dd></div>
-            </dl>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
+<!--              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Contact Number</span><span class="font-semibold text-sm">{{ complaint()!.contactNumber }}</span></div>-->
+<!--              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Issue Category</span><span class="font-semibold text-sm">{{ complaint()!.issueCategory }}</span></div>-->
+              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Technology</span><span class="font-semibold text-sm">{{ complaint()!.technology ?? '—' }}</span></div>
+              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Feedback Collected</span>
+                <span class="font-semibold text-sm" [class.text-success]="complaint()!.customerFeedbackTaken">{{ complaint()!.customerFeedbackTaken ? 'Yes' : 'No' }}</span>
+              </div>
+
+              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Issue Duration</span><span class="font-semibold text-sm">{{ complaint()!.issueDuration ?? '—' }}</span></div>
+              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Last Experienced</span><span class="font-semibold text-sm">{{ complaint()!.lastExperienced ? (complaint()!.lastExperienced | date:'dd MMM yyyy, HH:mm') : '—' }}</span></div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-base-200 space-y-4">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1.5 block">Issue Description</span>
+                <p class="text-sm font-medium bg-base-200/60 border border-base-200 p-3 rounded-lg whitespace-pre-wrap leading-relaxed">{{ complaint()!.issueDescription }}</p>
+              </div>
+
+              @if (complaint()!.additionalInfo) {
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1.5 block">Additional Information</span>
+                  <p class="text-sm font-medium bg-base-100 border border-base-200 p-3 rounded-lg whitespace-pre-wrap leading-relaxed">{{ complaint()!.additionalInfo }}</p>
+                </div>
+              }
+            </div>
+
+            @if (complaint()!.address || complaint()!.latitude) {
+              <div class="mt-4 pt-4 border-t border-base-200 grid grid-cols-1 md:grid-cols-2 gap-4">
+                @if (complaint()!.address) {
+                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Physical Address</span><span class="font-semibold text-sm">{{ complaint()!.address }}</span></div>
+                }
+<!--                @if (complaint()!.latitude) {-->
+<!--                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">GPS Location</span><span class="font-mono font-bold text-xs text-secondary">{{ complaint()!.latitude }}, {{ complaint()!.longitude }}</span></div>-->
+<!--                }-->
+              </div>
+            }
           </div>
         </div>
 
-        <!-- Customer info card -->
         <div class="card bg-base-100 border border-base-300">
           <div class="card-body p-5">
-            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-3">
-              Customer Information
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-4 flex items-center gap-2 border-b border-base-200 pb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
+              Device & Network Information
             </h3>
-            <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              <div><dt class="text-base-content/50">Name</dt><dd class="font-medium">{{ complaint()!.customerName }}</dd></div>
-              <div><dt class="text-base-content/50">Contact</dt><dd class="font-medium">{{ complaint()!.contactNumber }}</dd></div>
-              <div class="col-span-2"><dt class="text-base-content/50">MSISDN(s)</dt>
-                <dd class="font-medium font-mono">{{ complaint()!.msisdns }}</dd></div>
-              <div><dt class="text-base-content/50">Issue Category</dt><dd class="font-medium">{{ complaint()!.issueCategory }}</dd></div>
-              <div><dt class="text-base-content/50">Technology</dt><dd class="font-medium">{{ complaint()!.technology ?? '—' }}</dd></div>
-              <div class="col-span-2"><dt class="text-base-content/50">Issue Description</dt>
-                <dd class="font-medium mt-1 p-3 bg-base-200 rounded-lg">{{ complaint()!.issueDescription }}</dd></div>
-              @if (complaint()!.address) {
-                <div class="col-span-2"><dt class="text-base-content/50">Address</dt>
-                  <dd class="font-medium">{{ complaint()!.address }}</dd></div>
-              }
-              @if (complaint()!.latitude) {
-                <div><dt class="text-base-content/50">GPS</dt>
-                  <dd class="font-medium font-mono text-xs">
-                    {{ complaint()!.latitude }}, {{ complaint()!.longitude }}
-                  </dd></div>
-              }
-            </dl>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
+              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Device Type</span><span class="font-semibold text-sm">{{ complaint()!.deviceType ?? '—' }}</span></div>
+              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Signal Bars</span><span class="font-semibold text-sm">{{ complaint()!.signalBars ?? '—' }}</span></div>
+              <div class="flex flex-col">
+                <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Using VPN/APN</span>
+                <span class="font-semibold text-sm">
+                  @if (complaint()!.usingVpnApn === true) { Yes }
+                  @else if (complaint()!.usingVpnApn === false) { No }
+                  @else { — }
+                </span>
+              </div>
+
+              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Serving Site / Cell (Reported)</span><span class="font-mono font-bold text-xs tracking-tight bg-base-200 w-max px-1.5 py-0.5 rounded">{{ complaint()!.servingSitesCells ?? '—' }}</span></div>
+              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Coverage Quality (Reported)</span><span class="font-semibold text-sm">{{ complaint()!.coverageQuality ?? '—' }}</span></div>
+            </div>
           </div>
         </div>
 
-        <!-- Analysis thread -->
         @if (complaint()!.status !== 'NOT_ASSIGNED' && complaint()!.status !== 'NOT_STARTED') {
           <div class="card bg-base-100 border border-base-300">
             <div class="card-body p-5">
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50">Analysis</h3>
+              <div class="flex items-center justify-between border-b border-base-200 pb-3 mb-4">
+                <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M15.17 11.42L21 5.58A2.652 2.652 0 0017.25 1.83l-5.83 5.83m-3.84 3.84l-5.83 5.83A2.652 2.652 0 005.58 21l5.83-5.83m3.84-3.84l5.83-5.83A2.652 2.652 0 0011.42 1.83l-5.83 5.83" /></svg>
+                  Diagnostic Analysis
+                </h3>
                 @if (canAddAnalysis()) {
-                  <button class="btn btn-outline btn-xs" (click)="showAnalysisForm.set(!showAnalysisForm())">
-                    + Add Analysis
-                  </button>
+                  <button class="btn btn-outline btn-primary btn-xs" (click)="showAnalysisForm.set(!showAnalysisForm())">+ Append Log</button>
                 }
               </div>
 
               @if (complaint()!.analysisEntries.length === 0) {
-                <p class="text-base-content/40 text-sm italic">No analysis entries yet.</p>
+                <p class="text-neutral/60 text-sm italic py-2">No technical analysis recorded yet.</p>
               }
 
-              @for (entry of complaint()!.analysisEntries; track entry.id) {
-                <div class="border-l-2 border-base-300 pl-4 mb-4">
-                  <div class="flex items-center gap-2 text-xs text-base-content/50 mb-1">
-                    <span class="font-semibold text-base-content/70">{{ entry.authorName }}</span>
-                    <span class="badge badge-xs badge-ghost">{{ entry.authorRole }}</span>
-                    <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
-                    @if (entry.edited) { <span class="badge badge-xs badge-warning">edited</span> }
+              <div class="space-y-4">
+                @for (entry of complaint()!.analysisEntries; track entry.id) {
+                  <div class="flex flex-col border border-base-200 bg-base-100 p-3 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-base-content">{{ entry.authorName }}</span>
+                        <span class="badge badge-neutral text-[9px] h-4">{{ entry.authorRole }}</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-xs text-neutral">
+                        <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                        @if (entry.edited) { <span class="badge badge-warning badge-xs text-[9px]">edited</span> }
+                      </div>
+                    </div>
+                    <p class="text-sm font-medium leading-relaxed">{{ entry.content }}</p>
                   </div>
-                  <p class="text-sm">{{ entry.content }}</p>
-                </div>
-              }
+                }
+              </div>
 
               @if (showAnalysisForm()) {
-                <form [formGroup]="analysisForm" (ngSubmit)="submitAnalysis()" class="mt-4 space-y-3 border-t border-base-300 pt-4">
+                <form [formGroup]="analysisForm" (ngSubmit)="submitAnalysis()" class="mt-4 p-4 bg-base-200/50 rounded-lg border border-base-300 space-y-3">
                   <div class="form-control">
-                    <label class="label"><span class="label-text text-xs font-medium">Analysis Content *</span></label>
-                    <textarea formControlName="content" rows="4" placeholder="Describe your analysis findings..."
-                              class="textarea textarea-bordered w-full text-sm"></textarea>
+                    <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Analysis Findings *</span></label>
+                    <textarea formControlName="content" rows="3" placeholder="Detail system metrics and observations..." class="textarea textarea-bordered w-full text-sm"></textarea>
                   </div>
-                  <div class="form-control">
-                    <label class="label"><span class="label-text text-xs font-medium">Serving Sites / Cells</span></label>
-                    <input type="text" formControlName="servingSitesCells"
-                           class="input input-bordered input-sm w-full" placeholder="e.g. CMB-BTS-001, Cell-A" />
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                      <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Serving Sites / Cells</span></label>
+                      <input type="text" formControlName="servingSitesCells" class="input input-bordered input-sm w-full" placeholder="e.g. CMB-BTS-001" />
+                    </div>
+                    <div class="form-control">
+                      <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Coverage Quality</span></label>
+                      <input type="text" formControlName="coverageQuality" class="input input-bordered input-sm w-full" placeholder="e.g. -90 dBm" />
+                    </div>
                   </div>
-                  <div class="form-control">
-                    <label class="label"><span class="label-text text-xs font-medium">Coverage & Quality</span></label>
-                    <input type="text" formControlName="coverageQuality"
-                           class="input input-bordered input-sm w-full" placeholder="e.g. -90 dBm, Good" />
-                  </div>
-                  <div class="flex gap-2 justify-end">
+                  <div class="flex gap-2 justify-end pt-2">
                     <button type="button" class="btn btn-ghost btn-sm" (click)="showAnalysisForm.set(false)">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-sm" [disabled]="actionLoading()">
-                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
-                      Save Analysis
+                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> } Save Entry
                     </button>
                   </div>
                 </form>
@@ -164,61 +196,60 @@
             </div>
           </div>
 
-          <!-- Solution thread -->
           <div class="card bg-base-100 border border-base-300">
             <div class="card-body p-5">
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50">Solution</h3>
+              <div class="flex items-center justify-between border-b border-base-200 pb-3 mb-4">
+                <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Applied Solutions
+                </h3>
                 @if (canAddSolution()) {
-                  <button class="btn btn-outline btn-xs" (click)="showSolutionForm.set(!showSolutionForm())">
-                    + Add Solution
-                  </button>
+                  <button class="btn btn-outline btn-success btn-xs" (click)="showSolutionForm.set(!showSolutionForm())">+ Record Solution</button>
                 }
               </div>
 
               @if (complaint()!.solutionEntries.length === 0) {
-                <p class="text-base-content/40 text-sm italic">No solution entries yet.</p>
+                <p class="text-neutral/60 text-sm italic py-2">No solutions implemented yet.</p>
               }
 
-              @for (entry of complaint()!.solutionEntries; track entry.id) {
-                <div class="border-l-2 border-success/40 pl-4 mb-4">
-                  <div class="flex items-center gap-2 text-xs text-base-content/50 mb-1">
-                    <span class="font-semibold text-base-content/70">{{ entry.authorName }}</span>
-                    <span class="badge badge-xs badge-ghost">{{ entry.authorRole }}</span>
-                    <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
-                    @if (entry.edited) { <span class="badge badge-xs badge-warning">edited</span> }
+              <div class="space-y-4">
+                @for (entry of complaint()!.solutionEntries; track entry.id) {
+                  <div class="flex flex-col border-l-4 border-success border-y border-r border-base-200 bg-success/5 p-3 rounded-r-lg shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-base-content">{{ entry.authorName }}</span>
+                        <span class="badge badge-success text-success-content text-[9px] h-4">{{ entry.authorRole }}</span>
+                      </div>
+                      <span class="text-xs text-neutral font-medium">{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                    </div>
+                    <p class="text-sm font-medium leading-relaxed text-base-content/90">{{ entry.content }}</p>
+                    @if (entry.remarks) {
+                      <div class="mt-2 text-xs text-neutral/80 bg-base-100/50 p-1.5 rounded font-medium"><span class="font-bold">Note:</span> {{ entry.remarks }}</div>
+                    }
                   </div>
-                  <p class="text-sm">{{ entry.content }}</p>
-                  @if (entry.remarks) {
-                    <p class="text-xs text-base-content/50 mt-1">Remarks: {{ entry.remarks }}</p>
-                  }
-                </div>
-              }
+                }
+              </div>
 
               @if (showSolutionForm()) {
-                <form [formGroup]="solutionForm" (ngSubmit)="submitSolution()" class="mt-4 space-y-3 border-t border-base-300 pt-4">
+                <form [formGroup]="solutionForm" (ngSubmit)="submitSolution()" class="mt-4 p-4 bg-success/5 rounded-lg border border-success/20 space-y-3">
                   <div class="form-control">
-                    <label class="label"><span class="label-text text-xs font-medium">Solution Details *</span></label>
-                    <textarea formControlName="content" rows="4" placeholder="Describe the solution applied..."
-                              class="textarea textarea-bordered w-full text-sm"></textarea>
+                    <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Solution Applied *</span></label>
+                    <textarea formControlName="content" rows="3" placeholder="Describe the steps taken to resolve..." class="textarea textarea-bordered textarea-success w-full text-sm"></textarea>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-2 gap-4">
                     <div class="form-control">
-                      <label class="label"><span class="label-text text-xs font-medium">Solution Target Date</span></label>
-                      <input type="date" formControlName="solutionTargetDate"
-                             class="input input-bordered input-sm w-full" />
+                      <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Solution Target Date</span></label>
+                      <input type="date" formControlName="solutionTargetDate" class="input input-bordered input-success input-sm w-full" />
                     </div>
                     <div class="form-control">
-                      <label class="label"><span class="label-text text-xs font-medium">Remarks</span></label>
-                      <input type="text" formControlName="remarks"
-                             class="input input-bordered input-sm w-full" placeholder="Optional remarks" />
+                      <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Internal Remarks</span></label>
+                      <input type="text" formControlName="remarks" class="input input-bordered input-success input-sm w-full" placeholder="Optional notes" />
                     </div>
                   </div>
-                  <div class="flex gap-2 justify-end">
+                  <div class="flex gap-2 justify-end pt-2">
                     <button type="button" class="btn btn-ghost btn-sm" (click)="showSolutionForm.set(false)">Cancel</button>
                     <button type="submit" class="btn btn-success btn-sm" [disabled]="actionLoading()">
-                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
-                      Save Solution
+                      @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> } Submit Resolution
                     </button>
                   </div>
                 </form>
@@ -228,30 +259,99 @@
         }
       </div>
 
-      <!-- Right: audit trail -->
-      <div class="space-y-4">
+      <div class="space-y-5">
+
+        <div class="card bg-base-100 border border-base-300">
+          <div class="card-body p-4">
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-3 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              General & Lifecycle
+            </h3>
+            <ul class="space-y-3 text-sm">
+              <li class="flex flex-col gap-0.5">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase">District</span>
+                <span class="font-semibold">{{ complaint()!.districtName }}</span>
+              </li>
+              <li class="flex flex-col gap-0.5">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase">Assigned To</span>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-semibold text-sm leading-none">{{ complaint()!.assignedToName ?? 'Unassigned' }}</span>
+                  @if (complaint()!.assignedToRole) {
+                    <span class="text-[9px] uppercase font-bold tracking-wider border border-base-300 px-1 rounded text-neutral/70">{{ complaint()!.assignedToRole }}</span>
+                  }
+                </div>
+              </li>
+              <li class="flex flex-col gap-0.5">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase">Raised By</span>
+                <span class="font-semibold">{{ complaint()!.raisedBy }}</span>
+              </li>
+              <li class="flex flex-col gap-0.5 border-b border-base-200 pb-2">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase">Logged By (System)</span>
+                <span class="font-semibold">{{ complaint()!.createdByName }}</span>
+              </li>
+
+              <li class="flex justify-between items-center pt-1">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase">Created On</span>
+                <span class="font-semibold text-xs">{{ complaint()!.createdAt | date:'dd MMM yy, HH:mm' }}</span>
+              </li>
+
+              <li class="flex justify-between items-center p-2 rounded bg-base-200/50 border border-base-200" [class.bg-error]="isPastTarget()" [class.border-error]="isPastTarget()" [class.text-error-content]="isPastTarget()">
+                <div class="flex flex-col">
+                  <span class="text-[10px] font-bold uppercase" [class.text-base-content-50]="!isPastTarget()" [class.opacity-90]="isPastTarget()">SLA Target</span>
+                  @if(isPastTarget()) { <span class="text-[9px] font-bold text-error tracking-wider uppercase mt-0.5">Breached</span> }
+                </div>
+                <span class="font-bold text-sm" [class.text-error]="isPastTarget()">{{ complaint()!.targetDate | date:'dd MMM yy, HH:mm' }}</span>
+              </li>
+
+              @if(complaint()!.resolvedAt) {
+                <li class="flex justify-between items-center pt-2">
+                  <span class="text-base-content/50 text-[10px] font-bold uppercase">Resolved On</span>
+                  <span class="font-semibold text-xs text-success">{{ complaint()!.resolvedAt | date:'dd MMM yy, HH:mm' }}</span>
+                </li>
+              }
+
+              @if(complaint()!.closedAt) {
+                <li class="flex justify-between items-center pt-1">
+                  <span class="text-base-content/50 text-[10px] font-bold uppercase">Closed On</span>
+                  <span class="font-semibold text-xs text-neutral">{{ complaint()!.closedAt | date:'dd MMM yy, HH:mm' }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+
         <div class="card bg-base-100 border border-base-300">
           <div class="card-body p-5">
-            <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/50 mb-4">Audit Trail</h3>
-            <ol class="relative border-l border-base-300 space-y-4">
-              @for (log of complaint()!.auditLogs; track log.id) {
-                <li class="ml-4">
-                  <div class="absolute w-2 h-2 bg-primary rounded-full mt-1.5 -left-1 border border-base-100"></div>
-                  <time class="text-xs text-base-content/40">
-                    {{ log.createdAt | date:'dd MMM, HH:mm' }}
-                  </time>
-                  <p class="text-sm font-semibold text-base-content/80 mt-0.5">
-                    {{ auditLabels[log.action] ?? log.action }}
-                  </p>
-                  <p class="text-xs text-base-content/50">by {{ log.actorName }}</p>
-                  @if (log.notes) {
-                    <p class="text-xs text-base-content/60 mt-1 italic">{{ log.notes }}</p>
-                  }
-                  @if (log.fromStatus && log.toStatus) {
-                    <div class="text-xs text-base-content/40 mt-0.5">
-                      {{ statusLabels[log.fromStatus] }} → {{ statusLabels[log.toStatus] }}
-                    </div>
-                  }
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-5 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              Audit Timeline
+            </h3>
+
+            <ol class="border-l-2 border-base-300 ml-2 space-y-5">
+              @for (log of sortedAuditLogs(); track log.id; let first = $first) {
+                <li class="relative pl-5 pb-1">
+                  <div class="audit-dot transition-all" [class]="first ? 'bg-secondary border-base-100 ring-2 ring-secondary/30' : ''"></div>
+
+                  <div class="flex flex-col -mt-1.5">
+                    <time class="text-[10px] font-mono text-neutral font-medium mb-0.5">
+                      {{ log.createdAt | date:'dd MMM, HH:mm' }}
+                    </time>
+                    <p class="text-sm font-bold text-base-content leading-tight">
+                      {{ auditLabels[log.action] ?? log.action }}
+                    </p>
+                    <p class="text-[11px] text-neutral/80 mt-0.5">by <span class="font-medium text-base-content">{{ log.actorName }}</span></p>
+
+                    @if (log.notes) {
+                      <p class="text-[11px] text-neutral mt-1.5 italic bg-base-200 px-2 py-1 rounded leading-snug">{{ log.notes }}</p>
+                    }
+                    @if (log.fromStatus && log.toStatus) {
+                      <div class="flex items-center gap-1 text-[10px] font-mono font-bold mt-1.5 bg-base-200 w-max px-1.5 py-0.5 rounded">
+                        <span class="text-neutral/70">{{ statusLabels[log.fromStatus] }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-neutral"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" /></svg>
+                        <span class="text-secondary">{{ statusLabels[log.toStatus] }}</span>
+                      </div>
+                    }
+                  </div>
                 </li>
               }
             </ol>
@@ -261,26 +361,108 @@
     </div>
   </div>
 
-  <!-- Dialogs -->
   @if (showResolveDialog()) {
-    <app-confirm-dialog-component
-      title="Mark as Resolved"
-      message="This will mark the complaint as resolved and notify the manager for closure."
-      confirmLabel="Mark Resolved"
-      confirmClass="btn-success"
-      [loading]="actionLoading()"
-      (confirmed)="markResolved()"
-      (cancelled)="showResolveDialog.set(false)" />
+    <app-confirm-dialog-component title="Mark as Resolved" message="This will mark the complaint as resolved and notify the manager for closure." confirmLabel="Mark Resolved" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="markResolved()" (cancelled)="showResolveDialog.set(false)" />
   }
 
   @if (showCloseDialog()) {
-    <app-confirm-dialog-component
-      title="Close Complaint"
-      message="This will permanently close the complaint. This action cannot be undone."
-      confirmLabel="Close"
-      confirmClass="btn-success"
-      [loading]="actionLoading()"
-      (confirmed)="closeComplaint()"
-      (cancelled)="showCloseDialog.set(false)" />
+    <app-confirm-dialog-component title="Close Complaint" message="This will permanently close the complaint. This action cannot be undone." confirmLabel="Close" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="closeComplaint()" (cancelled)="showCloseDialog.set(false)" />
   }
+}
+
+@if (showEscalateDialog()) {
+  <dialog class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-1">Escalate to Engineer</h3>
+      <p class="text-sm text-base-content/60 mb-4">
+        Select an engineer from {{ complaint()!.districtName }} to take over this complaint.
+      </p>
+
+      @if (availableEngineers().length === 0) {
+        <div class="alert alert-warning">
+          <span class="text-sm">No engineers are assigned to {{ complaint()!.districtName }}. Contact your administrator.</span>
+        </div>
+      } @else {
+        <div class="form-control mb-3">
+          <label class="label">
+            <span class="label-text font-medium">Assign to Engineer *</span>
+          </label>
+          <select class="select select-bordered w-full"
+                  [value]="selectedEngineerId()"
+                  (change)="selectedEngineerId.set(+($any($event.target).value))">
+            <option value="">Select engineer...</option>
+            @for (eng of availableEngineers(); track eng.id) {
+              <option [value]="eng.id">{{ eng.fullName }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text font-medium">Notes (optional)</span>
+          </label>
+          <textarea class="textarea textarea-bordered w-full text-sm" rows="2"
+                    placeholder="Reason for escalation or handover notes..."
+                    [value]="escalateNotes()"
+                    (input)="escalateNotes.set($any($event.target).value)"></textarea>
+        </div>
+      }
+
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="showEscalateDialog.set(false)">Cancel</button>
+        @if (availableEngineers().length > 0) {
+          <button class="btn btn-accent" [disabled]="!selectedEngineerId() || actionLoading()"
+                  (click)="escalateToEngineer()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-sm"></span> }
+            Escalate
+          </button>
+        }
+      </div>
+    </div>
+    <div class="modal-backdrop" (click)="showEscalateDialog.set(false)"></div>
+  </dialog>
+}
+
+@if (showReopenDialog()) {
+  <dialog class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-1">Re-open Complaint</h3>
+      <p class="text-sm text-base-content/60 mb-4">
+        The resolution was not satisfactory. Re-assign this complaint and provide a reason.
+      </p>
+
+      <div class="form-control mb-3">
+        <label class="label">
+          <span class="label-text font-medium">Re-assign to *</span>
+        </label>
+        <select class="select select-bordered w-full"
+                (change)="reopenAssigneeId.set(+($any($event.target).value))">
+          <option value="">Select TO / Engineer...</option>
+          @for (u of availableAssignees(); track u.id) {
+            <option [value]="u.id">{{ u.fullName }} ({{ u.role }})</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text font-medium">Reason *</span>
+        </label>
+        <textarea class="textarea textarea-bordered w-full text-sm" rows="3"
+                  placeholder="Explain why the resolution is unsatisfactory..."
+                  (input)="reopenNotes.set($any($event.target).value)"></textarea>
+      </div>
+
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="showReopenDialog.set(false)">Cancel</button>
+        <button class="btn btn-warning"
+                [disabled]="!reopenAssigneeId() || !reopenNotes() || actionLoading()"
+                (click)="reopenComplaint()">
+          @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
+          Re-open & Re-assign
+        </button>
+      </div>
+    </div>
+    <div class="modal-backdrop" (click)="showReopenDialog.set(false)"></div>
+  </dialog>
 }

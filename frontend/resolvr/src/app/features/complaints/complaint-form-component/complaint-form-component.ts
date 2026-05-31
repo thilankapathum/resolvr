@@ -7,6 +7,7 @@ import {Router, RouterLink} from "@angular/router";
 import {ToastService} from '../../../shared/toast-service';
 import {DistrictResponse, UserResponse, ROLE_LABELS} from '../../../core/models/models';
 import {PageHeaderComponent} from '../../../shared/page-header-component/page-header-component';
+import {UserService} from '../../admin/user-service';
 
 @Component({
   selector: 'app-complaint-form-component',
@@ -21,6 +22,7 @@ import {PageHeaderComponent} from '../../../shared/page-header-component/page-he
 export class ComplaintFormComponent implements OnInit {
   private readonly fb           = inject(FormBuilder);
   private readonly adminSvc     = inject(AdminService);
+  private readonly userSvc = inject(UserService);
   private readonly complaintSvc = inject(ComplaintService);
   private readonly auth         = inject(Auth);
   private readonly router       = inject(Router);
@@ -63,12 +65,24 @@ export class ComplaintFormComponent implements OnInit {
 
   ngOnInit() {
     this.adminSvc.getDistricts().subscribe(d => this.districts.set(d));
-    this.adminSvc.getUsers(0, 200).subscribe(page => {
-      this.assignableUsers.set(
-        page.content.filter(u =>
-          u.active && (u.role === 'TECHNICAL_OFFICER' || u.role === 'ENGINEER')
-        )
-      );
+
+    // Load all assigners initially (no district selected)
+    this.userSvc.getAssigners(0).subscribe({
+      next: data => this.assignableUsers.set(data),
+      error: err => console.error(err),
+    });
+
+    // Reload assigners when district changes
+    this.form.get('districtId')?.valueChanges.subscribe(districtId => {
+      const id = districtId ? Number(districtId) : 0;
+
+      // Clear the current assignee selection since they may not belong to the new district
+      this.form.get('assignedToId')?.setValue('');
+
+      this.userSvc.getAssigners(id).subscribe({
+        next: data => this.assignableUsers.set(data),
+        error: err => console.error(err),
+      });
     });
 
     // Keep MSISDN in sync with contact number when checkbox is ticked

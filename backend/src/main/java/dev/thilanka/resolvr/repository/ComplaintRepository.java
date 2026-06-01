@@ -34,17 +34,17 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long>,
 
     // All complaints in a region (for Manager/Head)
     @Query("""
-        SELECT c FROM Complaint c
-        WHERE c.district.region.id = :regionId
-        ORDER BY c.createdAt DESC
-        """)
+            SELECT c FROM Complaint c
+            WHERE c.district.region.id = :regionId
+            ORDER BY c.createdAt DESC
+            """)
     Page<Complaint> findByRegionId(@Param("regionId") Long regionId, Pageable pageable);
 
     // Complaints in a region with status filter
     @Query("""
-        SELECT c FROM Complaint c
-        WHERE c.district.region.id = :regionId AND c.status = :status
-        """)
+            SELECT c FROM Complaint c
+            WHERE c.district.region.id = :regionId AND c.status = :status
+            """)
     Page<Complaint> findByRegionIdAndStatus(
             @Param("regionId") Long regionId,
             @Param("status") ComplaintStatus status,
@@ -53,11 +53,11 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long>,
 
     // For TO/Engineer: assigned to them OR created by them in their district
     @Query("""
-        SELECT c FROM Complaint c
-        WHERE c.assignedTo.id = :userId
-           OR (c.createdBy.id = :userId AND c.assignedTo IS NULL)
-        ORDER BY c.createdAt DESC
-        """)
+            SELECT c FROM Complaint c
+            WHERE c.assignedTo.id = :userId
+               OR (c.createdBy.id = :userId AND c.assignedTo IS NULL)
+            ORDER BY c.createdAt DESC
+            """)
     Page<Complaint> findRelevantForUser(@Param("userId") Long userId, Pageable pageable);
 
     // Count by status for dashboard
@@ -76,4 +76,74 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long>,
             ORDER BY c.createdAt DESC
             """)
     Page<Complaint> findAllInUserDistricts(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT c FROM Complaint c
+            WHERE c.district.id IN (
+                SELECT d.id FROM User u JOIN u.districts d WHERE u.id = :userId
+            )
+            AND (:status IS NULL OR c.status = :status)
+            AND (
+                :search IS NULL OR :search = '' OR
+                LOWER(c.refNumber)          LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.customerName)       LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.contactNumber)      LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.msisdns)            LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.issueDescription)   LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.raisedBy)           LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.district.name)      LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.customerName)       LIKE LOWER(CONCAT('%', :search, '%'))
+            )
+            ORDER BY c.createdAt DESC
+            """)
+    Page<Complaint> findAllInUserDistrictsFiltered(
+            @Param("userId") Long userId,
+            @Param("status") ComplaintStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT DISTINCT c FROM Complaint c
+            WHERE c.district.region.id = :regionId
+            AND (:status IS NULL OR c.status = :status)
+            AND (
+                :search IS NULL OR :search = '' OR
+                LOWER(c.refNumber)          LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.customerName)       LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.contactNumber)      LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.msisdns)            LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.issueDescription)   LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.raisedBy)           LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.district.name)      LIKE LOWER(CONCAT('%', :search, '%'))
+            )
+            ORDER BY c.createdAt DESC
+            """)
+    Page<Complaint> findByRegionFiltered(
+            @Param("regionId") Long regionId,
+            @Param("status") ComplaintStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT DISTINCT c FROM Complaint c
+            WHERE (:status IS NULL OR c.status = :status)
+            AND (
+                :search IS NULL OR :search = '' OR
+                LOWER(c.refNumber)          LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.customerName)       LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.contactNumber)      LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.msisdns)            LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.issueDescription)   LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.raisedBy)           LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.district.name)      LIKE LOWER(CONCAT('%', :search, '%'))
+            )
+            ORDER BY c.createdAt DESC
+            """)
+    Page<Complaint> findAllFiltered(
+            @Param("status") ComplaintStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }

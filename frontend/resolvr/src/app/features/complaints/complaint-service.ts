@@ -10,9 +10,15 @@ export class ComplaintService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/complaints`;
 
-  getComplaints(page = 0, size = 20, sort = 'createdAt,desc') {
-    const params = new HttpParams()
-      .set('page', page).set('size', size).set('sort', sort);
+  getComplaints(page = 0, size = 20, status = '', search = '') {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+
+    if (status) params = params.set('status', status);
+    if (search) params = params.set('search', search);
+
     return this.http.get<Page<ComplaintResponse>>(this.api, { params });
   }
 

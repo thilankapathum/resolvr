@@ -66,4 +66,14 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long>,
 
     @Query("SELECT c.status, COUNT(c) FROM Complaint c WHERE c.assignedTo.id = :userId GROUP BY c.status")
     List<Object[]> countByStatusForUser(@Param("userId") Long userId);
+
+    // All complaints in any of the user's assigned districts
+    @Query("""
+            SELECT DISTINCT c FROM Complaint c
+            WHERE c.district.id IN (
+                SELECT d.id FROM User u JOIN u.districts d WHERE u.id = :userId
+            )
+            ORDER BY c.createdAt DESC
+            """)
+    Page<Complaint> findAllInUserDistricts(@Param("userId") Long userId, Pageable pageable);
 }

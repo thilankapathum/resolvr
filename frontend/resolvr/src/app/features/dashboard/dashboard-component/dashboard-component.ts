@@ -31,11 +31,10 @@ export class DashboardComponent implements OnInit{
 
   loadData() {
     this.loading.set(true);
-    this.complaintSvc.getComplaints(0, 10, 'createdAt,desc').subscribe({
+    this.complaintSvc.getMyQueue(0, 10).subscribe({
       next: page => {
-        const complaints = page.content;
-        this.recentComplaints.set(complaints);
-        this.buildStats(page.totalElements, complaints);
+        this.recentComplaints.set(page.content);
+        this.buildStats(page.totalElements, page.content);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

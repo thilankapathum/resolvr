@@ -152,4 +152,11 @@ public class ComplaintController {
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         return ResponseEntity.ok(complaintService.reopenComplaint(id, request, currentUser));
     }
+
+    @GetMapping("/my-queue")
+    public ResponseEntity<Page<ComplaintResponse>> getMyQueue(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+        return ResponseEntity.ok(complaintService.getMyQueue(currentUser, pageable));
+    }
 }

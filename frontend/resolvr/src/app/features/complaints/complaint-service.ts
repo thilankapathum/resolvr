@@ -64,4 +64,10 @@ export class ComplaintService {
     return this.http.post<ComplaintResponse>(`${this.api}/${id}/reopen`, { assignedToId, notes });
   }
 
+  getMyQueue(page = 0, size = 10) {
+    const params = new HttpParams()
+      .set('page', page).set('size', size).set('sort', 'createdAt,desc');
+    return this.http.get<Page<ComplaintResponse>>(`${this.api}/my-queue`, { params });
+  }
+
 }

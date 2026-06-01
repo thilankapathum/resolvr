@@ -466,7 +466,8 @@ public class ComplaintService {
         User user = getUser(actor.getId());
         return switch (user.getRole()) {
             case TECHNICAL_OFFICER, ENGINEER ->
-                    complaintRepository.findRelevantForUser(user.getId(), pageable)
+                // Show ALL complaints in their assigned districts, not just assigned-to-them
+                    complaintRepository.findAllInUserDistricts(user.getId(), pageable)
                             .map(ComplaintResponse::summary);
             case MANAGER ->
                     complaintRepository.findByRegionId(user.getRegion().getId(), pageable)
@@ -494,6 +495,22 @@ public class ComplaintService {
         refSeqRepository.save(seq);
 
         return "%s-%s-%04d".formatted(district.getCode(), yearMonth, seq.getLastSeq());
+    }
+
+    public Page<ComplaintResponse> getMyQueue(UserDetailsImpl actor, Pageable pageable) {
+        User user = getUser(actor.getId());
+        return switch (user.getRole()) {
+            case TECHNICAL_OFFICER, ENGINEER ->
+                // Dashboard: only complaints assigned to this user
+                    complaintRepository.findRelevantForUser(user.getId(), pageable)
+                            .map(ComplaintResponse::summary);
+            case MANAGER ->
+                    complaintRepository.findByRegionIdAndStatus(
+                                    user.getRegion().getId(), ComplaintStatus.IN_PROGRESS, pageable)
+                            .map(ComplaintResponse::summary);
+            case HEAD, ADMIN ->
+                    complaintRepository.findAll(pageable).map(ComplaintResponse::summary);
+        };
     }
 
     // ── Validation Helpers ───────────────────────────────────────

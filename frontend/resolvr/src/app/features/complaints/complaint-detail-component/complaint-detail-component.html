@@ -1,145 +1,202 @@
 @if (loading()) {
-  <app-loading-spinner-component message="Loading complaint..." />
+  <app-loading-spinner-component message="Loading complaint..."/>
 } @else if (complaint()) {
-  <div class="max-w-6xl mx-auto space-y-5 py-4">
+  <div class="max-w-6xl mx-auto space-y-6 py-4">
 
-    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-base-300 pb-4">
-      <div class="space-y-2">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-base-300 pb-5">
+      <div class="space-y-3">
         <div class="flex items-center gap-3">
-          <a routerLink="/app/complaints" class="btn btn-ghost btn-xs text-base-content/60 hover:text-primary pl-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" /></svg>
+          <a routerLink="/app/complaints" class="btn btn-ghost btn-xs text-base-content/60 hover:text-primary pl-0 gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+              <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/>
+            </svg>
             Back
           </a>
-          <span class="ref-number">{{ complaint()!.refNumber }}</span>
-          <app-status-badge-component [status]="complaint()!.status" />
-          <app-priority-badge-component [priority]="complaint()!.priority" />
+          <span class="ref-number px-2 py-0.5 bg-primary/10 rounded">{{ complaint()!.refNumber }}</span>
+          <app-status-badge-component [status]="complaint()!.status"/>
+          <app-priority-badge-component [priority]="complaint()!.priority"/>
         </div>
 
-        <h1 class="text-2xl font-bold text-base-content tracking-tight">{{ complaint()!.customerName }}</h1>
+        <h1 class="text-2xl font-extrabold text-base-content tracking-tight">{{ complaint()!.customerName }}</h1>
 
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral font-medium">
-          <span class="badge badge-neutral badge-outline badge-sm border-base-300 font-bold">{{ complaint()!.issueCategory }}</span>
-          <span class="text-base-content/50">&bull;</span>
-          <span class="flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.572l.06.031a1.532 1.532 0 00.022.01zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
-            {{ complaint()!.districtName }} ({{ complaint()!.districtCode }})
+        <!-- Contextual Meta Bar -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral font-medium">
+          <span class="badge badge-neutral badge-outline badge-sm border-base-300 font-bold bg-base-100 shadow-sm">{{ complaint()!.issueCategory }}</span>
+
+          <span class="flex items-center gap-1.5 opacity-80">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+            {{ complaint()!.districtName }} <span class="text-[11px] font-mono opacity-70">({{ complaint()!.districtCode }})</span>
           </span>
-          <span class="text-base-content/50">&bull;</span>
-          <span class="flex items-center gap-1 text-sm tracking-tight">
-            {{ complaint()!.contactNumber }}
+
+          <!-- Contact Number with Hover Copy -->
+          <span class="flex items-center gap-1.5 text-sm tracking-tight group cursor-pointer" (click)="copyToClipboard(complaint()!.contactNumber)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 opacity-70"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.596-5.273-3.974-6.869-6.87l1.292-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+            <span class="group-hover:text-primary transition-colors">{{ complaint()!.contactNumber }}</span>
+            <button class="btn btn-ghost btn-xs px-1 h-6 min-h-0 opacity-0 group-hover:opacity-100 transition-all text-primary" title="Copy Number">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
+            </button>
           </span>
-          <span class="text-base-content/50">&bull;</span>
-          <span class="flex items-center gap-1 text-sm tracking-tight text-accent">
-            {{ complaint()!.latitude }}, {{ complaint()!.longitude }}
-          </span>
+
+          <!-- Coordinates with Hover Copy -->
+          @if (complaint()!.latitude && complaint()!.longitude) {
+            <span class="flex items-center gap-1.5 text-sm tracking-tight text-accent font-mono bg-accent/5 px-2 py-1 rounded group cursor-pointer" (click)="copyToClipboard(complaint()!.latitude + ', ' + complaint()!.longitude)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+              <span class="group-hover:underline">{{ complaint()!.latitude }}, {{ complaint()!.longitude }}</span>
+              <button class="btn btn-ghost btn-xs px-1 h-6 min-h-0 opacity-0 group-hover:opacity-100 transition-all text-accent" title="Copy Coordinates">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
+              </button>
+            </span>
+          }
         </div>
       </div>
 
       <div class="flex gap-2 flex-wrap items-center">
         @if (canStart()) {
-          <button class="btn btn-primary btn-sm" (click)="startComplaint()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+          <button class="btn btn-primary btn-sm shadow-sm" (click)="startComplaint()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
             Start Analysing
           </button>
         }
         @if (canMarkResolved()) {
-          <button class="btn btn-success btn-sm" (click)="showResolveDialog.set(true)">✓ Mark Resolved</button>
+          <button class="btn btn-success text-white btn-sm shadow-sm" (click)="showResolveDialog.set(true)">✓ Mark Resolved</button>
         }
         @if (canEscalate()) {
-          <button class="btn btn-accent btn-sm" (click)="openEscalateDialog()">
-            ↑ Escalate to Engineer
-          </button>
+          <button class="btn btn-accent btn-sm shadow-sm" (click)="openEscalateDialog()">↑ Escalate to Engineer</button>
         }
         @if (canClose()) {
-          <button class="btn btn-neutral btn-sm" (click)="showCloseDialog.set(true)">Close Complaint</button>
+          <button class="btn btn-neutral btn-sm shadow-sm" (click)="showCloseDialog.set(true)">Close Complaint</button>
         }
         @if (canReopen()) {
-          <button class="btn btn-warning btn-sm" (click)="openReopenDialog()">↩ Re-open</button>
+          <button class="btn btn-warning btn-sm shadow-sm" (click)="openReopenDialog()">↩ Re-open</button>
         }
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-      <div class="lg:col-span-2 space-y-5">
+      <!-- Left Column -->
+      <div class="lg:col-span-2 space-y-6">
 
+        <!-- Core Issue Card -->
         <div class="card bg-base-100 border border-base-300">
-          <div class="card-body p-5">
-            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-4 flex items-center gap-2 border-b border-base-200 pb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-              Customer & Issue Information
+          <div class="card-body p-6">
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-5 flex items-center gap-2 border-b border-base-200 pb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-primary"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+              Customer & Issue Details
             </h3>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
-<!--              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Contact Number</span><span class="font-semibold text-sm">{{ complaint()!.contactNumber }}</span></div>-->
-<!--              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Issue Category</span><span class="font-semibold text-sm">{{ complaint()!.issueCategory }}</span></div>-->
-              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Technology</span><span class="font-semibold text-sm">{{ complaint()!.technology ?? '—' }}</span></div>
-              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Feedback Collected</span>
-                <span class="font-semibold text-sm" [class.text-success]="complaint()!.customerFeedbackTaken">{{ complaint()!.customerFeedbackTaken ? 'Yes' : 'No' }}</span>
-              </div>
-
-              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Issue Duration</span><span class="font-semibold text-sm">{{ complaint()!.issueDuration ?? '—' }}</span></div>
-              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Last Experienced</span><span class="font-semibold text-sm">{{ complaint()!.lastExperienced ? (complaint()!.lastExperienced | date:'dd MMM yyyy, HH:mm') : '—' }}</span></div>
+            <div class="flex flex-col mb-6">
+              <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
+                Target MSISDN(s)
+              </span>
+              <span class="font-mono font-bold text-lg text-primary tracking-tight bg-primary/5 px-2 py-1 rounded w-max border border-primary/10">{{ complaint()!.msisdns }}</span>
             </div>
 
-            <div class="mt-4 pt-4 border-t border-base-200 space-y-4">
+            <div class="space-y-5">
               <div>
-                <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1.5 block">Issue Description</span>
-                <p class="text-sm font-medium bg-base-200/60 border border-base-200 p-3 rounded-lg whitespace-pre-wrap leading-relaxed">{{ complaint()!.issueDescription }}</p>
+                <span class="text-[10px] uppercase font-bold text-base-content/50 mb-2 block flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+                  Issue Description
+                </span>
+                <p class="text-sm font-medium border-l-4 border-base-300 pl-4 py-1 text-base-content/90 whitespace-pre-wrap leading-relaxed">{{ complaint()!.issueDescription }}</p>
               </div>
 
               @if (complaint()!.additionalInfo) {
                 <div>
-                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1.5 block">Additional Information</span>
-                  <p class="text-sm font-medium bg-base-100 border border-base-200 p-3 rounded-lg whitespace-pre-wrap leading-relaxed">{{ complaint()!.additionalInfo }}</p>
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-2 block flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    Additional Information
+                  </span>
+                  <p class="text-sm font-medium border-l-4 border-base-200 pl-4 py-1 text-base-content/70 whitespace-pre-wrap leading-relaxed">{{ complaint()!.additionalInfo }}</p>
                 </div>
               }
             </div>
 
-            @if (complaint()!.address || complaint()!.latitude) {
-              <div class="mt-4 pt-4 border-t border-base-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                @if (complaint()!.address) {
-                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Physical Address</span><span class="font-semibold text-sm">{{ complaint()!.address }}</span></div>
-                }
-<!--                @if (complaint()!.latitude) {-->
-<!--                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">GPS Location</span><span class="font-mono font-bold text-xs text-secondary">{{ complaint()!.latitude }}, {{ complaint()!.longitude }}</span></div>-->
-<!--                }-->
+            <div class="mt-6 pt-5 border-t border-base-200 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6">
+              @if (complaint()!.technology) {
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" /></svg>Technology</span>
+                  <span class="font-semibold text-sm">{{ complaint()!.technology }}</span>
+                </div>
+              }
+              @if (complaint()!.issueDuration) {
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Duration</span>
+                  <span class="font-semibold text-sm">{{ complaint()!.issueDuration }}</span>
+                </div>
+              }
+              @if (complaint()!.lastExperienced) {
+                <div class="flex flex-col md:col-span-2">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>Last Experienced</span>
+                  <span class="font-semibold text-sm">{{ complaint()!.lastExperienced | date:'dd MMM yyyy, HH:mm' }}</span>
+                </div>
+              }
+            </div>
+
+            @if (complaint()!.address) {
+              <div class="mt-5 pt-5 border-t border-base-200 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" /></svg>Physical Address</span>
+                  <span class="font-semibold text-sm leading-snug">{{ complaint()!.address }}</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>Feedback Collected</span>
+                  <span class="font-bold text-sm" [class.text-success]="complaint()!.customerFeedbackTaken">{{ complaint()!.customerFeedbackTaken ? 'Yes' : 'No' }}</span>
+                </div>
               </div>
             }
           </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-300">
-          <div class="card-body p-5">
-            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-4 flex items-center gap-2 border-b border-base-200 pb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
-              Device & Network Information
-            </h3>
+        <!-- Technical Block -->
+        @if (complaint()!.deviceType || complaint()!.signalBars || complaint()!.usingVpnApn === true || complaint()!.usingVpnApn === false || complaint()!.servingSitesCells) {
+          <div class="card bg-base-100 border border-base-300">
+            <div class="card-body p-6">
+              <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-5 flex items-center gap-2 border-b border-base-200 pb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-secondary"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.585-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" /></svg>
+                Network & Telemetry
+              </h3>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
-              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Device Type</span><span class="font-semibold text-sm">{{ complaint()!.deviceType ?? '—' }}</span></div>
-              <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Signal Bars</span><span class="font-semibold text-sm">{{ complaint()!.signalBars ?? '—' }}</span></div>
-              <div class="flex flex-col">
-                <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Using VPN/APN</span>
-                <span class="font-semibold text-sm">
-                  @if (complaint()!.usingVpnApn === true) { Yes }
-                  @else if (complaint()!.usingVpnApn === false) { No }
-                  @else { — }
-                </span>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6">
+                @if (complaint()!.deviceType){
+                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Device Type</span><span class="font-semibold text-sm">{{ complaint()!.deviceType }}</span></div>
+                }
+                @if (complaint()!.signalBars) {
+                  <div class="flex flex-col"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Signal Bars</span><span class="font-semibold text-sm">{{ complaint()!.signalBars }}</span></div>
+                }
+                @if (complaint()!.usingVpnApn === true || complaint()!.usingVpnApn === false) {
+                  <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Using VPN/APN</span>
+                    <span class="font-semibold text-sm">{{ complaint()!.usingVpnApn ? 'Yes' : 'No' }}</span>
+                  </div>
+                }
+
+                <div class="flex flex-col md:col-span-2">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm-3-6h.008v.008h-.008v-.008z" /></svg>Serving Site / Cell</span>
+                  <span class="font-mono font-bold text-xs tracking-tight bg-base-200 w-max px-2 py-1 rounded">{{ complaint()!.servingSitesCells ?? '—' }}</span>
+                </div>
+
+                <div class="flex flex-col md:col-span-2">
+                  <span class="text-[10px] uppercase font-bold text-base-content/50 mb-1 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>Coverage Quality</span>
+                  <span class="font-semibold text-sm">{{ complaint()!.coverageQuality ?? '—' }}</span>
+                </div>
               </div>
-
-              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Serving Site / Cell (Reported)</span><span class="font-mono font-bold text-xs tracking-tight bg-base-200 w-max px-1.5 py-0.5 rounded">{{ complaint()!.servingSitesCells ?? '—' }}</span></div>
-              <div class="flex flex-col md:col-span-2"><span class="text-[10px] uppercase font-bold text-base-content/50 mb-0.5">Coverage Quality (Reported)</span><span class="font-semibold text-sm">{{ complaint()!.coverageQuality ?? '—' }}</span></div>
             </div>
           </div>
-        </div>
+        }
 
+        <!-- Analysis Thread -->
         @if (complaint()!.status !== 'NOT_ASSIGNED' && complaint()!.status !== 'NOT_STARTED') {
           <div class="card bg-base-100 border border-base-300">
             <div class="card-body p-5">
               <div class="flex items-center justify-between border-b border-base-200 pb-3 mb-4">
                 <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M15.17 11.42L21 5.58A2.652 2.652 0 0017.25 1.83l-5.83 5.83m-3.84 3.84l-5.83 5.83A2.652 2.652 0 005.58 21l5.83-5.83m3.84-3.84l5.83-5.83A2.652 2.652 0 0011.42 1.83l-5.83 5.83" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M15.17 11.42L21 5.58A2.652 2.652 0 0017.25 1.83l-5.83 5.83m-3.84 3.84l-5.83 5.83A2.652 2.652 0 005.58 21l5.83-5.83m3.84-3.84l5.83-5.83A2.652 2.652 0 0011.42 1.83l-5.83 5.83"/>
+                  </svg>
                   Diagnostic Analysis
                 </h3>
                 @if (canAddAnalysis()) {
@@ -161,7 +218,9 @@
                       </div>
                       <div class="flex items-center gap-2 text-xs text-neutral">
                         <span>{{ entry.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
-                        @if (entry.edited) { <span class="badge badge-warning badge-xs text-[9px]">edited</span> }
+                        @if (entry.edited) {
+                          <span class="badge badge-warning badge-xs text-[9px]">edited</span>
+                        }
                       </div>
                     </div>
                     <p class="text-sm font-medium leading-relaxed">{{ entry.content }}</p>
@@ -178,11 +237,11 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div class="form-control">
                       <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Serving Sites / Cells</span></label>
-                      <input type="text" formControlName="servingSitesCells" class="input input-bordered input-sm w-full" placeholder="e.g. CMB-BTS-001" />
+                      <input type="text" formControlName="servingSitesCells" class="input input-bordered input-sm w-full" placeholder="e.g. CMB-BTS-001"/>
                     </div>
                     <div class="form-control">
                       <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Coverage Quality</span></label>
-                      <input type="text" formControlName="coverageQuality" class="input input-bordered input-sm w-full" placeholder="e.g. -90 dBm" />
+                      <input type="text" formControlName="coverageQuality" class="input input-bordered input-sm w-full" placeholder="e.g. -90 dBm"/>
                     </div>
                   </div>
                   <div class="flex gap-2 justify-end pt-2">
@@ -196,11 +255,14 @@
             </div>
           </div>
 
+          <!-- Solutions Thread -->
           <div class="card bg-base-100 border border-base-300">
             <div class="card-body p-5">
               <div class="flex items-center justify-between border-b border-base-200 pb-3 mb-4">
                 <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
                   Applied Solutions
                 </h3>
                 @if (canAddSolution()) {
@@ -224,7 +286,9 @@
                     </div>
                     <p class="text-sm font-medium leading-relaxed text-base-content/90">{{ entry.content }}</p>
                     @if (entry.remarks) {
-                      <div class="mt-2 text-xs text-neutral/80 bg-base-100/50 p-1.5 rounded font-medium"><span class="font-bold">Note:</span> {{ entry.remarks }}</div>
+                      <div class="mt-2 text-xs text-neutral/80 bg-base-100/50 p-1.5 rounded font-medium">
+                        <span class="font-bold">Note:</span> {{ entry.remarks }}
+                      </div>
                     }
                   </div>
                 }
@@ -239,11 +303,11 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div class="form-control">
                       <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Solution Target Date</span></label>
-                      <input type="date" formControlName="solutionTargetDate" class="input input-bordered input-success input-sm w-full" />
+                      <input type="date" formControlName="solutionTargetDate" class="input input-bordered input-success input-sm w-full"/>
                     </div>
                     <div class="form-control">
                       <label class="label py-1"><span class="label-text text-xs font-bold text-neutral">Internal Remarks</span></label>
-                      <input type="text" formControlName="remarks" class="input input-bordered input-success input-sm w-full" placeholder="Optional notes" />
+                      <input type="text" formControlName="remarks" class="input input-bordered input-success input-sm w-full" placeholder="Optional notes"/>
                     </div>
                   </div>
                   <div class="flex gap-2 justify-end pt-2">
@@ -259,61 +323,62 @@
         }
       </div>
 
-      <div class="space-y-5">
+      <!-- Right Column: Meta & Audit -->
+      <div class="space-y-6">
 
         <div class="card bg-base-100 border border-base-300">
-          <div class="card-body p-4">
-            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-3 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              General & Lifecycle
+          <div class="card-body p-5">
+            <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-4 flex items-center gap-2 border-b border-base-200 pb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Assignment & Lifecycle
             </h3>
-            <ul class="space-y-3 text-sm">
-              <li class="flex flex-col gap-0.5">
-                <span class="text-base-content/50 text-[10px] font-bold uppercase">District</span>
-                <span class="font-semibold">{{ complaint()!.districtName }}</span>
-              </li>
-              <li class="flex flex-col gap-0.5">
-                <span class="text-base-content/50 text-[10px] font-bold uppercase">Assigned To</span>
-                <div class="flex items-center gap-1.5 mt-0.5">
-                  <span class="font-semibold text-sm leading-none">{{ complaint()!.assignedToName ?? 'Unassigned' }}</span>
+
+            <ul class="space-y-4 text-sm">
+              <li class="flex flex-col gap-1">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>Assigned Engineer</span>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm">{{ complaint()!.assignedToName ?? 'Unassigned' }}</span>
                   @if (complaint()!.assignedToRole) {
-                    <span class="text-[9px] uppercase font-bold tracking-wider border border-base-300 px-1 rounded text-neutral/70">{{ complaint()!.assignedToRole }}</span>
+                    <span class="text-[9px] uppercase font-bold tracking-widest border border-base-300 px-1.5 py-0.5 rounded text-neutral/70">{{ complaint()!.assignedToRole }}</span>
                   }
                 </div>
               </li>
-              <li class="flex flex-col gap-0.5">
-                <span class="text-base-content/50 text-[10px] font-bold uppercase">Raised By</span>
+
+              <li class="flex flex-col gap-1">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>Raised By</span>
                 <span class="font-semibold">{{ complaint()!.raisedBy }}</span>
               </li>
-              <li class="flex flex-col gap-0.5 border-b border-base-200 pb-2">
-                <span class="text-base-content/50 text-[10px] font-bold uppercase">Logged By (System)</span>
-                <span class="font-semibold">{{ complaint()!.createdByName }}</span>
-              </li>
 
-              <li class="flex justify-between items-center pt-1">
-                <span class="text-base-content/50 text-[10px] font-bold uppercase">Created On</span>
-                <span class="font-semibold text-xs">{{ complaint()!.createdAt | date:'dd MMM yy, HH:mm' }}</span>
-              </li>
-
-              <li class="flex justify-between items-center p-2 rounded bg-base-200/50 border border-base-200" [class.bg-error]="isPastTarget()" [class.border-error]="isPastTarget()" [class.text-error-content]="isPastTarget()">
-                <div class="flex flex-col">
-                  <span class="text-[10px] font-bold uppercase" [class.text-base-content-50]="!isPastTarget()" [class.opacity-90]="isPastTarget()">SLA Target</span>
-                  @if(isPastTarget()) { <span class="text-[9px] font-bold text-error tracking-wider uppercase mt-0.5">Breached</span> }
+              <li class="flex flex-col gap-1 border-b border-base-200 pb-3">
+                <span class="text-base-content/50 text-[10px] font-bold uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" /></svg>Logged By (System)</span>
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold">{{ complaint()!.createdByName }}</span>
+                  <span class="text-base-content/50 text-xs font-mono">{{ complaint()!.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
                 </div>
-                <span class="font-bold text-sm" [class.text-error]="isPastTarget()">{{ complaint()!.targetDate | date:'dd MMM yy, HH:mm' }}</span>
               </li>
 
-              @if(complaint()!.resolvedAt) {
+              <li class="flex justify-between items-center p-3 rounded-lg bg-base-200/50 border border-base-200 shadow-inner"
+                  [class.bg-error]="isPastTarget()" [class.border-error]="isPastTarget()" [class.text-error-content]="isPastTarget()">
+                <div class="flex flex-col">
+                  <span class="text-[10px] font-bold uppercase tracking-wider" [class.text-base-content-50]="!isPastTarget()" [class.opacity-90]="isPastTarget()">SLA Target Date</span>
+                  @if (isPastTarget()) {
+                    <span class="text-[9px] font-black text-error tracking-widest uppercase mt-0.5 animate-pulse">Breached</span>
+                  }
+                </div>
+                <span class="font-bold text-sm tracking-tight" [class.text-error]="isPastTarget()">{{ complaint()!.targetDate | date:'dd MMM yyyy, HH:mm' }}</span>
+              </li>
+
+              @if (complaint()!.resolvedAt) {
                 <li class="flex justify-between items-center pt-2">
-                  <span class="text-base-content/50 text-[10px] font-bold uppercase">Resolved On</span>
-                  <span class="font-semibold text-xs text-success">{{ complaint()!.resolvedAt | date:'dd MMM yy, HH:mm' }}</span>
+                  <span class="text-base-content/50 text-[10px] font-bold uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Resolved On</span>
+                  <span class="font-bold text-xs text-success tracking-tight">{{ complaint()!.resolvedAt | date:'dd MMM yy, HH:mm' }}</span>
                 </li>
               }
 
-              @if(complaint()!.closedAt) {
+              @if (complaint()!.closedAt) {
                 <li class="flex justify-between items-center pt-1">
-                  <span class="text-base-content/50 text-[10px] font-bold uppercase">Closed On</span>
-                  <span class="font-semibold text-xs text-neutral">{{ complaint()!.closedAt | date:'dd MMM yy, HH:mm' }}</span>
+                  <span class="text-base-content/50 text-[10px] font-bold uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>Closed On</span>
+                  <span class="font-bold text-xs text-neutral tracking-tight">{{ complaint()!.closedAt | date:'dd MMM yy, HH:mm' }}</span>
                 </li>
               }
             </ul>
@@ -323,7 +388,9 @@
         <div class="card bg-base-100 border border-base-300">
           <div class="card-body p-5">
             <h3 class="font-bold text-[11px] uppercase tracking-widest text-neutral mb-5 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+              </svg>
               Audit Timeline
             </h3>
 
@@ -347,7 +414,9 @@
                     @if (log.fromStatus && log.toStatus) {
                       <div class="flex items-center gap-1 text-[10px] font-mono font-bold mt-1.5 bg-base-200 w-max px-1.5 py-0.5 rounded">
                         <span class="text-neutral/70">{{ statusLabels[log.fromStatus] }}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-neutral"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-neutral">
+                          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
+                        </svg>
                         <span class="text-secondary">{{ statusLabels[log.toStatus] }}</span>
                       </div>
                     }
@@ -361,108 +430,84 @@
     </div>
   </div>
 
+  <!-- Dialogs -->
   @if (showResolveDialog()) {
-    <app-confirm-dialog-component title="Mark as Resolved" message="This will mark the complaint as resolved and notify the manager for closure." confirmLabel="Mark Resolved" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="markResolved()" (cancelled)="showResolveDialog.set(false)" />
+    <app-confirm-dialog-component title="Mark as Resolved" message="This will mark the complaint as resolved and notify the manager for closure." confirmLabel="Mark Resolved" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="markResolved()" (cancelled)="showResolveDialog.set(false)"/>
   }
 
   @if (showCloseDialog()) {
-    <app-confirm-dialog-component title="Close Complaint" message="This will permanently close the complaint. This action cannot be undone." confirmLabel="Close" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="closeComplaint()" (cancelled)="showCloseDialog.set(false)" />
+    <app-confirm-dialog-component title="Close Complaint" message="This will permanently close the complaint. This action cannot be undone." confirmLabel="Close" confirmClass="btn-success" [loading]="actionLoading()" (confirmed)="closeComplaint()" (cancelled)="showCloseDialog.set(false)"/>
   }
-}
 
-@if (showEscalateDialog()) {
-  <dialog class="modal modal-open">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg mb-1">Escalate to Engineer</h3>
-      <p class="text-sm text-base-content/60 mb-4">
-        Select an engineer from {{ complaint()!.districtName }} to take over this complaint.
-      </p>
+  @if (showEscalateDialog()) {
+    <dialog class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-1">Escalate to Engineer</h3>
+        <p class="text-sm text-base-content/60 mb-4">Select an engineer from {{ complaint()!.districtName }} to take over this complaint.</p>
 
-      @if (availableEngineers().length === 0) {
-        <div class="alert alert-warning">
-          <span class="text-sm">No engineers are assigned to {{ complaint()!.districtName }}. Contact your administrator.</span>
+        @if (availableEngineers().length === 0) {
+          <div class="alert alert-warning">
+            <span class="text-sm">No engineers are assigned to {{ complaint()!.districtName }}. Contact your administrator.</span>
+          </div>
+        } @else {
+          <div class="form-control mb-3">
+            <label class="label"><span class="label-text font-medium">Assign to Engineer *</span></label>
+            <select class="select select-bordered w-full" [value]="selectedEngineerId()" (change)="selectedEngineerId.set(+($any($event.target).value))">
+              <option value="">Select engineer...</option>
+              @for (eng of availableEngineers(); track eng.id) {
+                <option [value]="eng.id">{{ eng.fullName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-control mb-4">
+            <label class="label"><span class="label-text font-medium">Notes (optional)</span></label>
+            <textarea class="textarea textarea-bordered w-full text-sm" rows="2" placeholder="Reason for escalation or handover notes..." [value]="escalateNotes()" (input)="escalateNotes.set($any($event.target).value)"></textarea>
+          </div>
+        }
+
+        <div class="modal-action">
+          <button class="btn btn-ghost" (click)="showEscalateDialog.set(false)">Cancel</button>
+          @if (availableEngineers().length > 0) {
+            <button class="btn btn-accent" [disabled]="!selectedEngineerId() || actionLoading()" (click)="escalateToEngineer()">
+              @if (actionLoading()) { <span class="loading loading-spinner loading-sm"></span> } Escalate
+            </button>
+          }
         </div>
-      } @else {
+      </div>
+      <div class="modal-backdrop" (click)="showEscalateDialog.set(false)"></div>
+    </dialog>
+  }
+
+  @if (showReopenDialog()) {
+    <dialog class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-1">Re-open Complaint</h3>
+        <p class="text-sm text-base-content/60 mb-4">The resolution was not satisfactory. Re-assign this complaint and provide a reason.</p>
+
         <div class="form-control mb-3">
-          <label class="label">
-            <span class="label-text font-medium">Assign to Engineer *</span>
-          </label>
-          <select class="select select-bordered w-full"
-                  [value]="selectedEngineerId()"
-                  (change)="selectedEngineerId.set(+($any($event.target).value))">
-            <option value="">Select engineer...</option>
-            @for (eng of availableEngineers(); track eng.id) {
-              <option [value]="eng.id">{{ eng.fullName }}</option>
+          <label class="label"><span class="label-text font-medium">Re-assign to *</span></label>
+          <select class="select select-bordered w-full" (change)="reopenAssigneeId.set(+($any($event.target).value))">
+            <option value="">Select TO / Engineer...</option>
+            @for (u of availableAssignees(); track u.id) {
+              <option [value]="u.id">{{ u.fullName }} ({{ u.role }})</option>
             }
           </select>
         </div>
 
         <div class="form-control mb-4">
-          <label class="label">
-            <span class="label-text font-medium">Notes (optional)</span>
-          </label>
-          <textarea class="textarea textarea-bordered w-full text-sm" rows="2"
-                    placeholder="Reason for escalation or handover notes..."
-                    [value]="escalateNotes()"
-                    (input)="escalateNotes.set($any($event.target).value)"></textarea>
+          <label class="label"><span class="label-text font-medium">Reason *</span></label>
+          <textarea class="textarea textarea-bordered w-full text-sm" rows="3" placeholder="Explain why the resolution is unsatisfactory..." (input)="reopenNotes.set($any($event.target).value)"></textarea>
         </div>
-      }
 
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="showEscalateDialog.set(false)">Cancel</button>
-        @if (availableEngineers().length > 0) {
-          <button class="btn btn-accent" [disabled]="!selectedEngineerId() || actionLoading()"
-                  (click)="escalateToEngineer()">
-            @if (actionLoading()) { <span class="loading loading-spinner loading-sm"></span> }
-            Escalate
+        <div class="modal-action">
+          <button class="btn btn-ghost" (click)="showReopenDialog.set(false)">Cancel</button>
+          <button class="btn btn-warning" [disabled]="!reopenAssigneeId() || !reopenNotes() || actionLoading()" (click)="reopenComplaint()">
+            @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> } Re-open & Re-assign
           </button>
-        }
+        </div>
       </div>
-    </div>
-    <div class="modal-backdrop" (click)="showEscalateDialog.set(false)"></div>
-  </dialog>
-}
-
-@if (showReopenDialog()) {
-  <dialog class="modal modal-open">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg mb-1">Re-open Complaint</h3>
-      <p class="text-sm text-base-content/60 mb-4">
-        The resolution was not satisfactory. Re-assign this complaint and provide a reason.
-      </p>
-
-      <div class="form-control mb-3">
-        <label class="label">
-          <span class="label-text font-medium">Re-assign to *</span>
-        </label>
-        <select class="select select-bordered w-full"
-                (change)="reopenAssigneeId.set(+($any($event.target).value))">
-          <option value="">Select TO / Engineer...</option>
-          @for (u of availableAssignees(); track u.id) {
-            <option [value]="u.id">{{ u.fullName }} ({{ u.role }})</option>
-          }
-        </select>
-      </div>
-
-      <div class="form-control mb-4">
-        <label class="label">
-          <span class="label-text font-medium">Reason *</span>
-        </label>
-        <textarea class="textarea textarea-bordered w-full text-sm" rows="3"
-                  placeholder="Explain why the resolution is unsatisfactory..."
-                  (input)="reopenNotes.set($any($event.target).value)"></textarea>
-      </div>
-
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="showReopenDialog.set(false)">Cancel</button>
-        <button class="btn btn-warning"
-                [disabled]="!reopenAssigneeId() || !reopenNotes() || actionLoading()"
-                (click)="reopenComplaint()">
-          @if (actionLoading()) { <span class="loading loading-spinner loading-xs"></span> }
-          Re-open & Re-assign
-        </button>
-      </div>
-    </div>
-    <div class="modal-backdrop" (click)="showReopenDialog.set(false)"></div>
-  </dialog>
+      <div class="modal-backdrop" (click)="showReopenDialog.set(false)"></div>
+    </dialog>
+  }
 }

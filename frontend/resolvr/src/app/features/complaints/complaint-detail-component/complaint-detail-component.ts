@@ -222,4 +222,12 @@ export class ComplaintDetailComponent {
       },
     });
   }
+
+  copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.toast.success('Copied to clipboard'); // Assuming you have a toast service
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }
 }

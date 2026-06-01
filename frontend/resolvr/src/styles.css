@@ -47,3 +47,7 @@ body {
 .audit-dot {
   @apply absolute w-2.5 h-2.5 bg-primary rounded-full -left-1.5 top-1.5 border-2 border-base-100;
 }/* You can add global styles to this file, and also import other style files */
+
+.title-font {
+  font-family: Oswald,sans-serif;
+}

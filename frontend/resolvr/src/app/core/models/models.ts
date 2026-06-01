@@ -174,7 +174,7 @@ export const STATUS_LABELS: Record<ComplaintStatus, string> = {
   NOT_ASSIGNED:          'Not Assigned',
   NOT_STARTED:           'Not Started',
   IN_PROGRESS:           'In Progress',
-  ESCALATED_TO_ENGINEER: 'Escalated to Engineer',
+  ESCALATED_TO_ENGINEER: 'Escalated',
   RESOLVED:              'Resolved',
   CLOSED:                'Closed',
 };

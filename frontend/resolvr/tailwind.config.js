@@ -29,11 +29,11 @@ module.exports = {
           "primary-content":  "#eef2f6",
 
           // Secondary — teal/mint green (charts, highlights, links)
-          "secondary":        "#135bf9",
+          "secondary":        "#9605f7",
           "secondary-content":"#eff6ff",
 
           // Accent — soft teal for interactive highlights
-          "accent":           "#1a368b",
+          "accent":           "#721377",
           "accent-content":   "#eff6ff",
 
           // Neutral — mid grey for tags and subtle elements

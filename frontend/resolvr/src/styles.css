@@ -48,6 +48,42 @@ body {
   @apply absolute w-2.5 h-2.5 bg-primary rounded-full -left-1.5 top-1.5 border-2 border-base-100;
 }/* You can add global styles to this file, and also import other style files */
 
+/* ── Sidebar nav links ── */
+.nav-link {
+  @apply flex items-center gap-3 px-3 py-2 rounded-lg
+  text-sm font-medium transition-colors text-base-content/70;
+}
+.nav-link svg {
+  @apply text-neutral/50;
+}
+.nav-link:hover {
+  @apply bg-primary/5 text-base-content;
+}
+.nav-link.active {
+  @apply bg-primary/5 text-base-content font-semibold;
+}
+.nav-link.active svg {
+  @apply text-accent;
+}
+
+/* ── Page fade-in ── */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: pageFadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* ── Title font ── */
 .title-font {
-  font-family: Oswald,sans-serif;
+  font-family: Oswald, sans-serif;
 }

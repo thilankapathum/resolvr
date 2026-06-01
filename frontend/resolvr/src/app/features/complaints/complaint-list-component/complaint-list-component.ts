@@ -2,7 +2,14 @@ import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ComplaintService} from '../complaint-service';
 import {Router, RouterLink} from '@angular/router';
 import {Auth} from '../../../core/auth';
-import {ComplaintResponse, ComplaintStatus, Page} from '../../../core/models/models';
+import {
+  ComplaintResponse,
+  ComplaintStatus,
+  Page,
+  ROLE_LABELS,
+  STATUS_LABELS,
+  UserRole
+} from '../../../core/models/models';
 import {PageHeaderComponent} from '../../../shared/page-header-component/page-header-component';
 import {LoadingSpinnerComponent} from '../../../shared/loading-spinner-component/loading-spinner-component';
 import {PriorityBadgeComponent} from '../../../shared/priority-badge-component/priority-badge-component';
@@ -29,6 +36,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
   private readonly complaintSvc = inject(ComplaintService);
   private readonly router       = inject(Router);
   readonly auth                 = inject(Auth);
+  protected readonly roleLabels = ROLE_LABELS;
 
   Math = Math;
 
@@ -103,5 +111,18 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
 
   isPastTarget(targetDate: string) {
     return new Date(targetDate) < new Date();
+  }
+
+  protected readonly STATUS_LABELS = STATUS_LABELS;
+
+  getRoleLabel(role: string | null): string {
+    if (!role) return 'Unknown Role';
+
+    // Check if the string actually matches one of your defined UserRoles
+    return this.roleLabels[role as UserRole] ?? role;
+  }
+
+  getStatusLabel(status: string | null): string{
+    return this.STATUS_LABELS[status as ComplaintStatus];
   }
 }

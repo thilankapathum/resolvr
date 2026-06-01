@@ -1,152 +1,217 @@
-<div class="drawer lg:drawer-open min-h-screen bg-base-100">
-  <input id="drawer-toggle" type="checkbox" class="drawer-toggle"
-         [checked]="drawerOpen" />
+<div class="flex h-screen overflow-hidden bg-base-100">
 
-  <!-- Page content -->
-  <div class="drawer-content flex flex-col">
-    <!-- Top bar -->
-    <header class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-20 px-4">
-      <div class="flex-none lg:hidden">
-        <label for="drawer-toggle" class="btn btn-square btn-ghost"
-               (click)="toggleDrawer()">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </label>
-      </div>
-      <div class="flex-1">
-        <span class="text-base font-semibold text-base-content/60 hidden sm:block">
-          {{ pageTitle() }}
-        </span>
-      </div>
-      <div class="flex-none flex items-center gap-3">
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost gap-2 normal-case">
-            <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-8">
-                <span class="text-sm font-bold">{{ initials() }}</span>
-              </div>
-            </div>
-            <div class="hidden md:block text-left">
-              <div class="text-sm font-medium">{{ auth.currentUser()?.fullName }}</div>
-              <div class="text-xs text-base-content/50">{{ roleLabel() }}</div>
-            </div>
-          </div>
-          <ul tabindex="0"
-              class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow border border-base-300 mt-2">
-            <li><a routerLink="/app/complaints/new" (click)="closeDrawer()">New Complaint</a></li>
-            <li><hr class="my-1 border-base-300"></li>
-            <li><button (click)="auth.logout()" class="text-error">Sign Out</button></li>
-          </ul>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main content -->
-    <main class="flex-1 p-4 lg:p-6">
-      <router-outlet />
-    </main>
-  </div>
+  <!-- Mobile backdrop — outside sidebar, covers full screen -->
+  @if (!mobileHidden() && isMobile()) {
+    <div class="fixed inset-0 bg-base-content/20 z-20 lg:hidden"
+         (click)="toggleMobile()"></div>
+  }
 
   <!-- Sidebar -->
-  <div class="drawer-side z-30">
-    <label for="drawer-toggle" class="drawer-overlay"
-           (click)="closeDrawer()"></label>
-    <aside class="w-64 min-h-full bg-base-100 border-r border-base-300 flex flex-col">
+  <aside
+    class="flex flex-col bg-base-200 border-r border-base-300 shrink-0 transition-all duration-200 ease-in-out"
+    [class]="sidebarOpen() ? 'w-60' : 'w-16'"
+    [class.hidden]="isMobile() && mobileHidden()"
+    [class.fixed]="isMobile()"
+    [class.inset-y-0]="isMobile()"
+    [class.left-0]="isMobile()"
+    [class.z-30]="isMobile()"
+    [class.w-60]="isMobile()"
+  >
 
-      <!-- Brand -->
-<!--      <div class="flex items-center gap-2 px-5 py-5 border-b border-base-300">-->
-<!--        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">-->
-<!--          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
-<!--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"-->
-<!--                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>-->
-<!--          </svg>-->
-<!--        </div>-->
-<!--        <span class="text-xl font-bold tracking-tight">Resolvr</span>-->
-<!--      </div>-->
-
-      <!-- Logo -->
-      <div class="flex items-center gap-3 px-5 py-5 border-b border-base-300">
-        <div class="w-7 h-7 rounded-lg flex items-center justify-center">
-<!--          <svg class="text-secondary" width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-<!--            <path d="M9 15H15M9 12H15M3 6V16.8C3 17.9201 3 18.4796 3.21799 18.9074C3.40973 19.2837 3.71547 19.5905 4.0918 19.7822C4.5192 20 5.07899 20 6.19691 20H17.8037C18.9216 20 19.4806 20 19.908 19.7822C20.2843 19.5905 20.5905 19.2841 20.7822 18.9078C21.0002 18.48 21.0002 17.9199 21.0002 16.7998L21.0002 9.19978C21.0002 8.07967 21.0002 7.51962 20.7822 7.0918C20.5905 6.71547 20.2837 6.40973 19.9074 6.21799C19.4796 6 18.9201 6 17.8 6H12M3 6H12M3 6C3 4.89543 3.89543 4 5 4H8.67452C9.1637 4 9.40915 4 9.63933 4.05526C9.8434 4.10425 10.0379 4.18526 10.2168 4.29492C10.4186 4.41856 10.5918 4.59183 10.9375 4.9375L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>-->
-<!--          </svg>-->
-          <svg class="w-8 h-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- Logo / Brand -->
+    <div class="flex items-center border-b border-base-300 h-16 px-4 shrink-0 relative">
+      <div class="flex items-center gap-3 transition-all duration-200 w-full overflow-hidden">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+          <svg class="w-7 h-7 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
-        <div>
-          <p class="text-sm font-semibold text-secondary">SLTMobitel <span class="title-font font-normal text-accent">Resolvr</span></p>
-          <p class="text-xs text-base-content/50">Complaint Tracking System</p>
-        </div>
+        @if (sidebarOpen() || isMobile()) {
+          <div class="truncate min-w-0">
+            <p class="text-sm font-semibold text-secondary whitespace-nowrap">
+              SLTMobitel <span class="title-font font-normal text-accent">Resolvr</span>
+            </p>
+            <p class="text-xs text-base-content/50 whitespace-nowrap">Complaint Tracking System</p>
+          </div>
+        }
       </div>
 
-      <!-- Navigation -->
-      <nav class="flex-1 p-3 space-y-1">
-        <ul class="menu menu-sm p-0 gap-1">
-          <li>
-            <a routerLink="/app/dashboard" routerLinkActive="active"
-               (click)="closeDrawer()"
-               class="flex items-center gap-3 rounded-lg px-3 py-2">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-              </svg>
-              Dashboard
-            </a>
-          </li>
-          <li>
-            <a routerLink="/app/complaints" routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: false}"
-               (click)="closeDrawer()"
-               class="flex items-center gap-3 rounded-lg px-3 py-2">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-              Complaints
-            </a>
-          </li>
+      <!-- Desktop collapse toggle -->
+      <button
+        class="hidden lg:flex items-center justify-center absolute z-30 transition-all duration-150
+               rounded-full border border-base-300 shadow-sm bg-base-100
+               text-base-content/60 hover:text-base-content hover:bg-base-200 w-6 h-6"
+        [class]="sidebarOpen()
+          ? 'right-2 top-1/2 -translate-y-1/2'
+          : 'left-full top-1/2 -translate-x-1/2 -translate-y-1/2'"
+        (click)="toggleSidebar()"
+        [title]="sidebarOpen() ? 'Collapse sidebar' : 'Expand sidebar'"
+      >
+        <svg class="w-3.5 h-3.5 transition-transform duration-200"
+             [class.rotate-180]="!sidebarOpen()"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+      </button>
+    </div>
 
-          @if (auth.isAdmin()) {
-            <li class="menu-title mt-4">
-              <span class="text-xs uppercase tracking-wider text-base-content/40 font-semibold">
-                Administration
-              </span>
-            </li>
-            <li>
-              <a routerLink="/app/admin/users" routerLinkActive="active"
-                 (click)="closeDrawer()"
-                 class="flex items-center gap-3 rounded-lg px-3 py-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                User Management
-              </a>
-            </li>
-            <li>
-              <a routerLink="/app/admin/regions" routerLinkActive="active"
-                 (click)="closeDrawer()"
-                 class="flex items-center gap-3 rounded-lg px-3 py-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                </svg>
-                Regions & Districts
-              </a>
-            </li>
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-1">
+
+      <ng-container *ngTemplateOutlet="navLink; context: {
+        route: '/app/dashboard',
+        label: 'Dashboard',
+        svgPath: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
+      }"/>
+
+      <ng-container *ngTemplateOutlet="navLink; context: {
+        route: '/app/complaints',
+        label: 'Complaints',
+        svgPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
+      }"/>
+
+      @if (isAdmin()) {
+        <div class="relative py-2 w-full flex items-center justify-center">
+          @if (sidebarOpen() || isMobile()) {
+            <div class="divider text-xs text-base-content/40 my-0 px-2 uppercase tracking-wider font-semibold w-full">
+              Admin
+            </div>
+          } @else {
+            <div class="border-t border-base-300 w-6 mx-auto my-1"></div>
           }
-        </ul>
-      </nav>
+        </div>
 
-      <!-- Footer -->
-      <div class="p-4 border-t border-base-300">
-        <div class="text-xs text-base-content/40 text-center">Resolvr v0.1</div>
+        <ng-container *ngTemplateOutlet="navLink; context: {
+          route: '/app/admin/users',
+          label: 'User Management',
+          svgPath: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+        }"/>
+
+        <ng-container *ngTemplateOutlet="navLink; context: {
+          route: '/app/admin/regions',
+          label: 'Regions & Districts',
+          svgPath: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7'
+        }"/>
+      }
+    </nav>
+
+    <!-- User footer -->
+    <div class="p-3 border-t border-base-300 bg-base-200/50 shrink-0 overflow-hidden">
+      <div
+        class="flex items-center px-2 py-2 rounded-lg hover:bg-base-300 transition-all duration-150 group cursor-pointer"
+        [class.justify-center]="!sidebarOpen() && !isMobile()"
+        [class.gap-3]="sidebarOpen() || isMobile()"
+        [title]="!sidebarOpen() && !isMobile() ? (user()?.fullName ?? '') : ''"
+      >
+        <div class="avatar placeholder shrink-0 transition-transform duration-150 group-hover:scale-105">
+          <div class="bg-primary text-primary-content rounded-full w-8 h-8 flex items-center justify-center">
+            <span class="text-xs font-bold">{{ initials() }}</span>
+          </div>
+        </div>
+        @if (sidebarOpen() || isMobile()) {
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate group-hover:text-secondary transition-colors">
+              {{ user()?.fullName }}
+            </p>
+            <p class="text-xs text-base-content/60 truncate">{{ roleLabel() }}</p>
+          </div>
+        }
       </div>
-    </aside>
+
+      <!-- Logout -->
+      <div class="mt-2" [class.px-1]="sidebarOpen() || isMobile()">
+        <button
+          (click)="auth.logout()"
+          class="w-full flex items-center transition-all duration-150 h-10 text-error
+                 rounded-lg hover:bg-error/5 group relative"
+          [class.justify-center]="!sidebarOpen() && !isMobile()"
+          [class.px-3]="sidebarOpen() || isMobile()"
+          [class.gap-3]="sidebarOpen() || isMobile()"
+          [title]="!sidebarOpen() && !isMobile() ? 'Logout' : ''"
+        >
+          <div class="w-5 h-5 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </div>
+          <span class="truncate transition-all duration-150 text-sm font-medium"
+                [class.opacity-0]="!sidebarOpen() && !isMobile()"
+                [class.w-0]="!sidebarOpen() && !isMobile()">
+            Logout
+          </span>
+          @if (!sidebarOpen() && !isMobile()) {
+            <span class="absolute left-full ml-4 px-2.5 py-1.5 bg-neutral text-neutral-content
+                         text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none
+                         group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-xl font-normal">
+              Logout
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Nav link template -->
+  <ng-template #navLink let-route="route" let-label="label" let-svgPath="svgPath">
+    <a [routerLink]="route" routerLinkActive="active"
+       (click)="isMobile() && toggleMobile()"
+       class="nav-link group relative flex items-center transition-all duration-150 h-10"
+       [class.justify-center]="!sidebarOpen() && !isMobile()"
+       [class.!px-0]="!sidebarOpen() && !isMobile()"
+       [class.!gap-0]="!sidebarOpen() && !isMobile()"
+       [title]="!sidebarOpen() && !isMobile() ? label : ''">
+
+      <div class="w-5 h-5 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="svgPath"/>
+        </svg>
+      </div>
+
+      <span class="truncate transition-all duration-150 text-sm"
+            [class.opacity-0]="!sidebarOpen() && !isMobile()"
+            [class.w-0]="!sidebarOpen() && !isMobile()">
+        {{ label }}
+      </span>
+
+      @if (!sidebarOpen() && !isMobile()) {
+        <span class="absolute left-full ml-4 px-2.5 py-1.5 bg-neutral text-neutral-content
+                     text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none
+                     group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-xl font-normal">
+          {{ label }}
+        </span>
+      }
+    </a>
+  </ng-template>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Mobile top bar -->
+    <header class="flex items-center gap-3 px-4 py-3 bg-base-100 border-b border-base-300 lg:hidden shrink-0">
+      <button class="btn btn-ghost btn-sm btn-square" (click)="toggleMobile()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-sm font-semibold text-secondary">
+          SLTMobitel <span class="title-font font-normal text-accent">Resolvr</span>
+        </span>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-5">
+      <div class="page-enter">
+        <router-outlet />
+      </div>
+    </main>
   </div>
 </div>
 

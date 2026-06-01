@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ComplaintService} from '../complaint-service';
 import {Router, RouterLink} from '@angular/router';
 import {Auth} from '../../../core/auth';
@@ -32,7 +32,7 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './complaint-list-component.html',
   styleUrl: './complaint-list-component.css',
 })
-export class ComplaintListComponent implements OnInit, OnDestroy{
+export class ComplaintListComponent implements OnInit, OnDestroy {
   private readonly complaintSvc = inject(ComplaintService);
   private readonly router       = inject(Router);
   readonly auth                 = inject(Auth);
@@ -43,12 +43,14 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
   loading      = signal(true);
   pagedData    = signal<Page<ComplaintResponse> | null>(null);
   currentPage  = signal(0);
+  pageSize     = signal(10);
   filterStatus = signal<string>('');
   searchQuery  = signal<string>('');
 
-  // Debounce search input to avoid firing on every keystroke
   private readonly searchSubject = new Subject<string>();
   private readonly destroy$      = new Subject<void>();
+
+  pageSizeOptions = [10, 20, 50, 100];
 
   statusOptions: { value: ComplaintStatus | ''; label: string }[] = [
     { value: '',                       label: 'All' },
@@ -60,10 +62,25 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
     { value: 'CLOSED',                 label: 'Closed' },
   ];
 
+  // Computed visible page numbers for pagination bar
+  visiblePages = computed(() => {
+    const total = this.pagedData()?.totalPages ?? 0;
+    const current = this.currentPage();
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+
+    const pages: (number | '...')[] = [];
+    if (current <= 3) {
+      pages.push(0, 1, 2, 3, 4, '...', total - 1);
+    } else if (current >= total - 4) {
+      pages.push(0, '...', total - 5, total - 4, total - 3, total - 2, total - 1);
+    } else {
+      pages.push(0, '...', current - 1, current, current + 1, '...', total - 1);
+    }
+    return pages;
+  });
+
   ngOnInit() {
     this.load();
-
-    // Debounce search — wait 350ms after user stops typing
     this.searchSubject.pipe(
       debounceTime(350),
       distinctUntilChanged(),
@@ -83,7 +100,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
   load() {
     this.loading.set(true);
     this.complaintSvc
-      .getComplaints(this.currentPage(), 20, this.filterStatus(), this.searchQuery())
+      .getComplaints(this.currentPage(), this.pageSize(), this.filterStatus(), this.searchQuery())
       .subscribe({
         next: data => { this.pagedData.set(data); this.loading.set(false); },
         error: ()   => { this.loading.set(false); },
@@ -100,8 +117,15 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
     this.load();
   }
 
-  setPage(page: number) {
+  setPage(page: number | '...') {
+    if (page === '...') return;
     this.currentPage.set(page);
+    this.load();
+  }
+
+  setPageSize(size: number) {
+    this.pageSize.set(size);
+    this.currentPage.set(0);
     this.load();
   }
 
@@ -116,13 +140,11 @@ export class ComplaintListComponent implements OnInit, OnDestroy{
   protected readonly STATUS_LABELS = STATUS_LABELS;
 
   getRoleLabel(role: string | null): string {
-    if (!role) return 'Unknown Role';
-
-    // Check if the string actually matches one of your defined UserRoles
+    if (!role) return '';
     return this.roleLabels[role as UserRole] ?? role;
   }
 
-  getStatusLabel(status: string | null): string{
-    return this.STATUS_LABELS[status as ComplaintStatus];
+  getStatusLabel(status: string | null): string {
+    return this.STATUS_LABELS[status as ComplaintStatus] ?? status ?? '';
   }
 }

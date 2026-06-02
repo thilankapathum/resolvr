@@ -1,38 +1,74 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}"
-  ],
+  content: ["./src/**/*.{html,ts}"],
   theme: {
-    extend: {}
+    extend: {
+      fontFamily: {
+        // sans: ['"Inter"', 'sans-serif'],
+        sans: ['"Google Sans"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        xs:    ['0.70rem', { lineHeight: '1rem' }],
+        sm:    ['0.78rem', { lineHeight: '1.15rem' }],
+        base:  ['0.85rem', { lineHeight: '1.35rem' }],
+        lg:    ['0.95rem', { lineHeight: '1.4rem' }],
+        xl:    ['1.05rem', { lineHeight: '1.5rem' }],
+        '2xl': ['1.2rem',  { lineHeight: '1.6rem' }],
+        '3xl': ['1.4rem',  { lineHeight: '1.75rem' }],
+      },
+    },
   },
   plugins: [require("daisyui")],
   daisyui: {
     themes: [
       {
         resolvr: {
-          "primary":         "#1d4ed8",   // Blue 700
-          "primary-content": "#ffffff",
-          "secondary":       "#0f766e",   // Teal 700
-          "secondary-content": "#ffffff",
-          "accent":          "#d97706",   // Amber 600
-          "accent-content":  "#ffffff",
-          "neutral":         "#1e293b",   // Slate 800
-          "neutral-content": "#f1f5f9",
-          "base-100":        "#f8fafc",   // Slate 50
-          "base-200":        "#f1f5f9",   // Slate 100
-          "base-300":        "#e2e8f0",   // Slate 200
-          "base-content":    "#0f172a",   // Slate 900
-          "info":            "#0ea5e9",
-          "success":         "#16a34a",
-          "warning":         "#d97706",
-          "error":           "#dc2626",
-        }
+          // Primary — dark navy (the "+ New" button, active nav)
+          "primary":          "#1a273a",
+          "primary-content":  "#eef2f6",
+
+          // Secondary — teal/mint green (charts, highlights, links)
+          "secondary":        "#9605f7",
+          "secondary-content":"#eff6ff",
+
+          // Accent — soft teal for interactive highlights
+          "accent":           "#721377",
+          "accent-content":   "#eff6ff",
+
+          // Neutral — mid grey for tags and subtle elements
+          "neutral":          "#61738d",
+          "neutral-content":  "#ffffff",
+
+          // Base — light grey page background matching the app
+          "base-100":         "#f8f8f8",   // page background
+          "base-200":         "#f5f5f4",   // sidebar, card headers
+          "base-300":         "#e6e4e3",   // borders, dividers
+          "base-content":     "#1a273a",   // primary text
+
+          // Semantic
+          "info":             "#2a7eff",
+          "info-content":     "#ffffff",
+          "success":          "#00c850",   // same teal as secondary
+          "success-content":  "#ffffff",
+          "warning":          "#fa9700",
+          "warning-content":  "#ffffff",
+          "error":            "#f82834",
+          "error-content":    "#ffffff",
+
+          // Shape
+          "--rounded-box":    "0.5rem",
+          "--rounded-btn":    "0.375rem",
+          "--rounded-badge":  "0.25rem",
+          "--tab-radius":     "0.375rem",
+          "--border-btn":     "1px",
+        },
       },
-      "light",
-      "dark"
     ],
     defaultTheme: "resolvr",
-    logs: false
-  }
-}
+    base: true,
+    styled: true,
+    utils: true,
+    logs: false,
+  },
+};

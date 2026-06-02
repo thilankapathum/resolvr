@@ -57,7 +57,7 @@ public class SecurityConfig {
                         // Admin only
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Heads, Managers, Admins can view all regions
-                        .requestMatchers(HttpMethod.GET, "/regions/**", "/districts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/regions/**", "/districts/**", "/users/**").authenticated()
                         // Everything else requires authentication
                         .anyRequest().authenticated()
                 )

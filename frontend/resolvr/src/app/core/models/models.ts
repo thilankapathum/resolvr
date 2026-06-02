@@ -174,18 +174,18 @@ export const STATUS_LABELS: Record<ComplaintStatus, string> = {
   NOT_ASSIGNED:          'Not Assigned',
   NOT_STARTED:           'Not Started',
   IN_PROGRESS:           'In Progress',
-  ESCALATED_TO_ENGINEER: 'Escalated to Engineer',
+  ESCALATED_TO_ENGINEER: 'Escalated',
   RESOLVED:              'Resolved',
   CLOSED:                'Closed',
 };
 
 export const STATUS_BADGE_CLASS: Record<ComplaintStatus, string> = {
-  NOT_ASSIGNED:          'badge-neutral',
-  NOT_STARTED:           'badge-warning',
-  IN_PROGRESS:           'badge-info',
+  NOT_ASSIGNED:          'badge-neutral badge-outline',
+  NOT_STARTED:           'badge-accent badge-outline',
+  IN_PROGRESS:           'badge-accent',
   ESCALATED_TO_ENGINEER: 'badge-accent',
   RESOLVED:              'badge-success',
-  CLOSED:                'badge-ghost',
+  CLOSED:                'badge-info',
 };
 
 export const PRIORITY_LABELS: Record<ComplaintPriority, string> = {
@@ -193,9 +193,9 @@ export const PRIORITY_LABELS: Record<ComplaintPriority, string> = {
 };
 
 export const PRIORITY_BADGE_CLASS: Record<ComplaintPriority, string> = {
-  LOW:    'badge-success',
-  MEDIUM: 'badge-warning',
-  HIGH:   'badge-error',
+  LOW:    'badge-neutral badge-outline',
+  MEDIUM: 'badge-warning badge-outline',
+  HIGH:   'badge-error badge-outline',
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {
@@ -216,7 +216,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   SOLUTION_EDITED:       'Solution Edited',
   ESCALATED_TO_ENGINEER: 'Escalated to Engineer',
   CUSTOMER_FEEDBACK_TAKEN: 'Customer Feedback Taken',
-  MARKED_RESOLVED:       'Marked as Resolved',
+  MARKED_RESOLVED:       'Resolved',
   CLOSED:                'Closed',
   REOPENED:              'Reopened',
   REASSIGNED:            'Reassigned',

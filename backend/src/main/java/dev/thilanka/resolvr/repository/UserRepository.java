@@ -30,4 +30,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findActiveByRegion(@Param("regionId") Long regionId);
 
     List<User> findByActiveAndRoleIsNull(boolean active);
+
+    @Query(value = """
+            SELECT * FROM public.users
+            WHERE role = 'ENGINEER' OR role = 'TECHNICAL_OFFICER'
+            ORDER BY full_name ASC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<User> findAllAssigners(@Param("limit") int limit);
+
+    @Query(value = """
+            SELECT * FROM public.users u
+            JOIN user_districts ud
+            	ON u.id = ud.user_id
+            WHERE ud.district_id = :districtId
+            	AND (u.role = 'ENGINEER' OR u.role = 'TECHNICAL_OFFICER')
+            """, nativeQuery = true)
+    List<User> findAllAssignersByDistrict(@Param("districtId") Long districtId);
 }

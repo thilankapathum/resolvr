@@ -10,9 +10,15 @@ export class ComplaintService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/complaints`;
 
-  getComplaints(page = 0, size = 20, sort = 'createdAt,desc') {
-    const params = new HttpParams()
-      .set('page', page).set('size', size).set('sort', sort);
+  getComplaints(page = 0, size = 20, status = '', search = '') {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+
+    if (status) params = params.set('status', status);
+    if (search) params = params.set('search', search);
+
     return this.http.get<Page<ComplaintResponse>>(this.api, { params });
   }
 
@@ -62,6 +68,12 @@ export class ComplaintService {
 
   reopenComplaint(id: number, assignedToId: number, notes: string) {
     return this.http.post<ComplaintResponse>(`${this.api}/${id}/reopen`, { assignedToId, notes });
+  }
+
+  getMyQueue(page = 0, size = 10) {
+    const params = new HttpParams()
+      .set('page', page).set('size', size).set('sort', 'createdAt,desc');
+    return this.http.get<Page<ComplaintResponse>>(`${this.api}/my-queue`, { params });
   }
 
 }

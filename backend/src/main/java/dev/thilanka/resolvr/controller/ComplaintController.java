@@ -24,11 +24,22 @@ public class ComplaintController {
 
     // ── List & Detail ────────────────────────────────────────────
 
+//    @GetMapping
+//    public ResponseEntity<Page<ComplaintResponse>> getComplaints(
+//            @AuthenticationPrincipal UserDetailsImpl currentUser,
+//            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+//        return ResponseEntity.ok(complaintService.getComplaintsForUser(currentUser, pageable));
+//    }
+
     @GetMapping
     public ResponseEntity<Page<ComplaintResponse>> getComplaints(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
-        return ResponseEntity.ok(complaintService.getComplaintsForUser(currentUser, pageable));
+        return ResponseEntity.ok(
+                complaintService.getComplaintsForUser(currentUser, status, search, pageable)
+        );
     }
 
     @GetMapping("/{id}")
@@ -151,5 +162,12 @@ public class ComplaintController {
             @Valid @RequestBody ManagerReopenRequest request,
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         return ResponseEntity.ok(complaintService.reopenComplaint(id, request, currentUser));
+    }
+
+    @GetMapping("/my-queue")
+    public ResponseEntity<Page<ComplaintResponse>> getMyQueue(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+        return ResponseEntity.ok(complaintService.getMyQueue(currentUser, pageable));
     }
 }

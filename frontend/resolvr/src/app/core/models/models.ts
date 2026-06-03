@@ -18,7 +18,7 @@ export type ComplaintStatus =
 export type ComplaintPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type IssueCategory = 'DATA' | 'VOICE' | 'VOICE_AND_DATA' | 'OTHER';
 export type DeviceType = 'PHONE' | 'DONGLE' | 'ROUTER' | 'IOT' | 'OTHER';
-export type TechnologyType = 'G2' | 'G3' | 'G4' | 'G5';
+export type TechnologyType = 'GSM' | 'UMTS' | 'LTE' | 'NR';
 export type AuditAction =
   | 'CREATED' | 'ASSIGNED' | 'STARTED'
   | 'ANALYSIS_ADDED' | 'ANALYSIS_EDITED'

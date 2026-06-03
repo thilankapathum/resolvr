@@ -1,6 +1,6 @@
 <div class="max-w-4xl mx-auto">
   <app-page-header-component title="Log New Complaint" subtitle="Fields marked * are required">
-    <a routerLink="/app/complaints" class="btn btn-ghost btn-sm">Cancel</a>
+    <a routerLink="/app/complaints" class="btn btn-outline border-neutral/25 btn-sm">Cancel</a>
   </app-page-header-component>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -29,8 +29,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">District *</span></label>
-              <select formControlName="districtId" class="select select-bordered w-full"
+              <label class="label"><span class="label-text font-medium">District <span class="text-error">*</span></span></label>
+              <select formControlName="districtId" class="select select-bordered select-sm w-full bg-warning/5"
                       [class.select-error]="isInvalid('districtId')">
                 <option value="">Select district...</option>
                 @for (d of districts(); track d.id) {
@@ -43,10 +43,10 @@
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Raised By *</span></label>
+              <label class="label"><span class="label-text font-medium">Raised By <span class="text-error">*</span></span></label>
               <input type="text" formControlName="raisedBy"
                      placeholder="Company employee who raised the complaint"
-                     class="input input-bordered w-full"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('raisedBy')" />
               @if (isInvalid('raisedBy')) {
                 <label class="label"><span class="label-text-alt text-error">Required.</span></label>
@@ -54,8 +54,8 @@
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Priority *</span></label>
-              <select formControlName="priority" class="select select-bordered w-full"
+              <label class="label"><span class="label-text font-medium">Priority <span class="text-error">*</span></span></label>
+              <select formControlName="priority" class="select select-bordered select-sm w-full bg-warning/5"
                       [class.select-error]="isInvalid('priority')">
                 <option value="">Select priority...</option>
                 <option value="LOW">Low — 72h target</option>
@@ -69,7 +69,7 @@
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Assign To (optional)</span></label>
-              <select formControlName="assignedToId" class="select select-bordered w-full">
+              <select formControlName="assignedToId" class="select select-bordered select-sm w-full">
                 <option value="">Leave unassigned</option>
                 @for (u of assignableUsers(); track u.id) {
                   <option [value]="u.id">{{ u.fullName }} ({{ u.role ? ROLE_LABELS[u.role] : '' }})</option>
@@ -81,7 +81,10 @@
 
           <div class="flex justify-end mt-4">
             <button type="button" class="btn btn-primary btn-sm" (click)="step.set(1)">
-              Next: Customer Info →
+              Next: Customer Info
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M13 18L19 12L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -99,24 +102,24 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Customer Name *</span></label>
+              <label class="label"><span class="label-text font-medium">Customer Name <span class="text-error">*</span></span></label>
               <input type="text" formControlName="customerName" placeholder="Full name"
-                     class="input input-bordered w-full"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('customerName')" />
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Contact Number *</span></label>
-              <input type="tel" formControlName="contactNumber" placeholder="077XXXXXXX"
-                     class="input input-bordered w-full"
+              <label class="label"><span class="label-text font-medium">Contact Number <span class="text-error">*</span></span></label>
+              <input type="tel" formControlName="contactNumber" placeholder="071XXXXXXX"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('contactNumber')" />
             </div>
 
             <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text font-medium">Affected MSISDN(s) *</span></label>
+              <label class="label"><span class="label-text font-medium">Affected MSISDN(s) <span class="text-error">*</span></span></label>
               <input type="text" formControlName="msisdns"
-                     placeholder="e.g. 0771234567, 0781234567 (comma separated)"
-                     class="input input-bordered w-full"
+                     placeholder="e.g. 0711234567, 0709876543 (comma separated)"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('msisdns')" />
               <label class="label cursor-pointer justify-start gap-3 pt-1">
                 <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
@@ -127,8 +130,8 @@
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Issue Category *</span></label>
-              <select formControlName="issueCategory" class="select select-bordered w-full"
+              <label class="label"><span class="label-text font-medium">Issue Category <span class="text-error">*</span></span></label>
+              <select formControlName="issueCategory" class="select select-bordered select-sm w-full bg-warning/5"
                       [class.select-error]="isInvalid('issueCategory')">
                 <option value="">Select category...</option>
                 <option value="DATA">Data</option>
@@ -140,20 +143,20 @@
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Technology</span></label>
-              <select formControlName="technology" class="select select-bordered w-full">
+              <select formControlName="technology" class="select select-bordered select-sm w-full">
                 <option value="">Not specified</option>
-                <option value="G2">2G</option>
-                <option value="G3">3G</option>
-                <option value="G4">4G</option>
-                <option value="G5">5G</option>
+                <option value="GSM">GSM</option>
+                <option value="UMTS">UMTS</option>
+                <option value="LTE">LTE</option>
+                <option value="NR">NR</option>
               </select>
             </div>
 
             <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text font-medium">Issue Description *</span></label>
+              <label class="label"><span class="label-text font-medium">Issue Description <span class="text-error">*</span></span></label>
               <textarea formControlName="issueDescription" rows="3"
                         placeholder="Describe the issue in detail..."
-                        class="textarea textarea-bordered w-full"
+                        class="textarea textarea-bordered w-full bg-warning/5"
                         [class.textarea-error]="isInvalid('issueDescription')"></textarea>
             </div>
 
@@ -161,26 +164,26 @@
               <label class="label"><span class="label-text font-medium">Issue Duration</span></label>
               <input type="text" formControlName="issueDuration"
                      placeholder="e.g. 3 days, since last Monday"
-                     class="input input-bordered w-full" />
+                     class="input input-bordered input-sm w-full" />
             </div>
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Last Experienced Date</span></label>
-              <input type="date" formControlName="lastExperienced" class="input input-bordered w-full" />
+              <input type="date" formControlName="lastExperienced" class="input input-bordered input-sm w-full" />
             </div>
 
             <div class="form-control md:col-span-2">
               <label class="label"><span class="label-text font-medium">Address</span></label>
               <input type="text" formControlName="address"
                      placeholder="Street address"
-                     class="input input-bordered w-full" />
+                     class="input input-bordered input-sm w-full" />
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Latitude *</span></label>
+              <label class="label"><span class="label-text font-medium">Latitude <span class="text-error">*</span></span></label>
               <input type="number" formControlName="latitude" step="0.0000001"
                      placeholder="e.g. 6.9271"
-                     class="input input-bordered w-full"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('latitude')" />
               @if (isInvalid('latitude')) {
                 <label class="label"><span class="label-text-alt text-error">Latitude is required.</span></label>
@@ -188,10 +191,10 @@
             </div>
 
             <div class="form-control">
-              <label class="label"><span class="label-text font-medium">Longitude *</span></label>
+              <label class="label"><span class="label-text font-medium">Longitude <span class="text-error">*</span></span></label>
               <input type="number" formControlName="longitude" step="0.0000001"
                      placeholder="e.g. 79.8612"
-                     class="input input-bordered w-full"
+                     class="input input-bordered input-sm w-full bg-warning/5"
                      [class.input-error]="isInvalid('longitude')" />
               @if (isInvalid('longitude')) {
                 <label class="label"><span class="label-text-alt text-error">Longitude is required.</span></label>
@@ -208,9 +211,16 @@
           </div>
 
           <div class="flex justify-between mt-4">
-            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(0)">← Back</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(0)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M11 6L5 12L11 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back</button>
             <button type="button" class="btn btn-primary btn-sm" (click)="step.set(2)">
-              Next: Device Info →
+              Next: Device Info
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M13 18L19 12L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -229,7 +239,7 @@
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Device Type</span></label>
-              <select formControlName="deviceType" class="select select-bordered w-full">
+              <select formControlName="deviceType" class="select select-bordered select-sm w-full">
                 <option value="">Not specified</option>
                 <option value="PHONE">Phone</option>
                 <option value="DONGLE">Dongle</option>
@@ -243,12 +253,12 @@
               <label class="label"><span class="label-text font-medium">Signal Bars (0–5)</span></label>
               <input type="number" formControlName="signalBars" min="0" max="5"
                      placeholder="e.g. 2"
-                     class="input input-bordered w-full" />
+                     class="input input-bordered input-sm w-full" />
             </div>
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Using VPN / Custom APN?</span></label>
-              <select formControlName="usingVpnApn" class="select select-bordered w-full">
+              <select formControlName="usingVpnApn" class="select select-bordered select-sm w-full">
                 <option value="">Unknown</option>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
@@ -389,9 +399,17 @@
           }
 
           <div class="flex justify-between mt-4">
-            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(1)">← Back</button>
-            <button type="submit" class="btn btn-primary" [disabled]="loading()">
+            <button type="button" class="btn btn-ghost btn-sm" (click)="step.set(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M11 6L5 12L11 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back</button>
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="loading()">
               @if (loading()) { <span class="loading loading-spinner loading-sm"></span> }
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 21H6.19691C5.07899 21 4.5192 21 4.0918 20.7822C3.71547 20.5905 3.40973 20.2837 3.21799 19.9074C3 19.4796 3 18.9203 3 17.8002V6.2002C3 5.08009 3 4.51962 3.21799 4.0918C3.40973 3.71547 3.71547 3.40973 4.0918 3.21799C4.51962 3 5.08009 3 6.2002 3H15.075C15.5998 3 15.8625 3 16.1073 3.06287C16.3242 3.11858 16.5303 3.21 16.7168 3.33398C16.9242 3.47181 17.0969 3.66374 17.4377 4.04241L20.1929 7.10378C20.487 7.43055 20.6366 7.59674 20.7432 7.78595C20.8393 7.95652 20.9095 8.14 20.9521 8.33105C21 8.54521 21 8.77072 21 9.21955V17.8031C21 18.921 21 19.4806 20.7822 19.908C20.5905 20.2843 20.2837 20.5905 19.9074 20.7822C19.48 21 18.921 21 17.8031 21L17 21.0002L7 21ZM17 21.0002V17.1969C17 16.079 17 15.5192 16.7822 15.0918C16.5905 14.7155 16.2837 14.4097 15.9074 14.218C15.4796 14 14.9203 14 13.8002 14H10.2002C9.08009 14 8.51962 14 8.0918 14.218C7.71547 14.4097 7.40973 14.7155 7.21799 15.0918C7 15.5196 7 16.0801 7 17.2002V21M15 7H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+
               Submit Complaint
             </button>
           </div>

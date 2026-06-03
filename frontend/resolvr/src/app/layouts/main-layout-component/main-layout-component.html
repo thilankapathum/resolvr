@@ -9,13 +9,13 @@
   <!-- Sidebar -->
   <aside
     class="flex flex-col bg-base-200 border-r border-base-300 shrink-0 transition-all duration-200 ease-in-out"
-    [class]="sidebarOpen() ? 'w-60' : 'w-16'"
+    [class.w-60]="sidebarOpen() || isMobile()"
+    [class.w-16]="!sidebarOpen() && !isMobile()"
     [class.hidden]="isMobile() && mobileHidden()"
     [class.fixed]="isMobile()"
     [class.inset-y-0]="isMobile()"
     [class.left-0]="isMobile()"
     [class.z-30]="isMobile()"
-    [class.w-60]="isMobile()"
   >
 
     <!-- Logo / Brand -->

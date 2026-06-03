@@ -4,7 +4,13 @@ import {ComplaintService} from '../complaint-service';
 import {Auth} from '../../../core/auth';
 import { ToastService } from "../../../shared/toast-service";
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {AUDIT_ACTION_LABELS, ComplaintResponse, STATUS_LABELS, UserResponse} from '../../../core/models/models';
+import {
+  AUDIT_ACTION_LABELS,
+  ComplaintResponse,
+  ROLE_LABELS,
+  STATUS_LABELS,
+  UserResponse, UserRole
+} from '../../../core/models/models';
 import {ConfirmDialogComponent} from '../../../shared/confirm-dialog-component/confirm-dialog-component';
 import {DatePipe} from '@angular/common';
 import {LoadingSpinnerComponent} from '../../../shared/loading-spinner-component/loading-spinner-component';
@@ -34,6 +40,8 @@ export class ComplaintDetailComponent {
   private readonly fb            = inject(FormBuilder);
   private readonly userSvc = inject(UserService);
 
+  protected readonly roleLabels = ROLE_LABELS;
+
   loading        = signal(true);
   actionLoading  = signal(false);
   complaint      = signal<ComplaintResponse | null>(null);
@@ -51,6 +59,14 @@ export class ComplaintDetailComponent {
     const logs = this.complaint()?.auditLogs;
     if (!logs) return [];
     return [...logs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  });
+
+  msisdnList = computed(() => {
+    const msisdns = this.complaint()?.msisdns;
+    if (!msisdns) return [];
+
+    // Splits by comma, trims whitespace, and removes empty elements
+    return msisdns.split(',').map(m => m.trim()).filter(m => m.length > 0);
   });
 
   showAnalysisForm   = signal(false);
@@ -229,5 +245,10 @@ export class ComplaintDetailComponent {
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
+  }
+
+  getRoleLabel(role: string | null): string {
+    if (!role) return '';
+    return this.roleLabels[role as UserRole] ?? role;
   }
 }

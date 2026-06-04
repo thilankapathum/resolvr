@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, HostListener, inject, signal} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ComplaintService} from '../complaint-service';
 import {Auth} from '../../../core/auth';
@@ -298,10 +298,44 @@ export class ComplaintDetailComponent {
 
   copyToClipboard(text: string) {
     navigator.clipboard.writeText(text).then(() => {
-      this.toast.success('Copied to clipboard'); // Assuming you have a toast service
+      this.toast.success('Copied to clipboard');
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
+  }
+
+  showCoordsMenu = signal(false);
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.showCoordsMenu()) this.showCoordsMenu.set(false);
+  }
+
+  toggleCoordsMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.showCoordsMenu.update(v => !v);
+  }
+
+  closeCoordsMenu() {
+    this.showCoordsMenu.set(false);
+  }
+
+  copyCoords() {
+    const c = this.complaint()!;
+    this.copyToClipboard(`${c.latitude}, ${c.longitude}`);
+    this.showCoordsMenu.set(false);
+  }
+
+  openInGoogleMaps() {
+    const c = this.complaint()!;
+    window.open(`https://www.google.com/maps?q=${c.latitude},${c.longitude}`, '_blank');
+    this.showCoordsMenu.set(false);
+  }
+
+  openInGoogleEarth() {
+    const c = this.complaint()!;
+    window.open(`https://earth.google.com/web/@${c.latitude},${c.longitude},500a,1000d,35y,0h,0t,0r`, '_blank');
+    this.showCoordsMenu.set(false);
   }
 
   getRoleLabel(role: string | null): string {

@@ -75,6 +75,10 @@ export class ComplaintDetailComponent {
   showCloseDialog    = signal(false);
   showReopenDialog   = signal(false);
   showEscalateDialog = signal(false);
+  showAssignCard   = signal(false);
+
+  availableAssignees_assign = signal<UserResponse[]>([]);
+  selectedAssigneeId        = signal<number | null>(null);
 
   readonly statusLabels = STATUS_LABELS;
   readonly auditLabels  = AUDIT_ACTION_LABELS;
@@ -115,15 +119,68 @@ export class ComplaintDetailComponent {
     return this.complaint()?.assignedToId === this.auth.currentUser()?.id;
   }
 
+  isCreator()      { return this.complaint()?.createdById === this.auth.currentUser()?.id; }
+  canAssign()      {
+    const status = this.complaint()?.status;
+    return this.isCreator() && (status === 'NOT_ASSIGNED' || status === 'NOT_STARTED');
+  }
   canStart()       { return this.isAssignee() && this.complaint()?.status === 'NOT_STARTED'; }
-  canAddAnalysis() { return this.isAssignee() && ['IN_PROGRESS','ESCALATED_TO_ENGINEER'].includes(this.complaint()?.status ?? ''); }
-  canAddSolution() { return this.canAddAnalysis() && (this.complaint()?.analysisEntries.length ?? 0) > 0; }
+
+  /**
+   * True when the current user may add analysis or solution entries.
+   * Rules mirror the backend validateCanContribute:
+   *  - Always allowed if you are the assignee.
+   *  - Also allowed if the complaint is IN_PROGRESS or ESCALATED_TO_ENGINEER
+   *    AND the current user is a TO or Engineer belonging to the complaint's district.
+   */
+  canContribute(): boolean {
+    const c    = this.complaint();
+    const user = this.auth.currentUser();
+    if (!c || !user) return false;
+
+    const activeStatuses: string[] = ['IN_PROGRESS', 'ESCALATED_TO_ENGINEER'];
+    if (!activeStatuses.includes(c.status)) return false;
+
+    // Assignee is always permitted
+    if (c.assignedToId === user.id) return true;
+
+    // Any TO or Engineer in the complaint's district is also permitted
+    const isTOorEngineer = user.role === 'TECHNICAL_OFFICER' || user.role === 'ENGINEER';
+    const isInDistrict   = user.districtIds?.includes(c.districtId) ?? false;
+    return isTOorEngineer && isInDistrict;
+  }
+
+  canAddAnalysis() { return this.canContribute(); }
+  canAddSolution() { return this.canContribute() && (this.complaint()?.analysisEntries.length ?? 0) > 0; }
   canMarkResolved(){ return this.isAssignee() && ['IN_PROGRESS','ESCALATED_TO_ENGINEER'].includes(this.complaint()?.status ?? ''); }
   canEscalate()    { return this.auth.isTO() && this.isAssignee() && this.complaint()?.status === 'IN_PROGRESS'; }
   canClose()       { return this.auth.isManager() && this.complaint()?.status === 'RESOLVED'; }
   canReopen()      { return this.auth.isManager() && this.complaint()?.status === 'RESOLVED'; }
 
   // ── Actions ───────────────────────────────────────────────────
+  openAssignDialog() {
+    const districtId = this.complaint()?.districtId;
+    if (!districtId) return;
+    this.userSvc.getAssigners(districtId).subscribe({
+      next: users => {
+        this.availableAssignees_assign.set(users);
+        this.selectedAssigneeId.set(null);
+        this.showAssignCard.set(true);
+      },
+      error: () => this.toast.error('Failed to load assignees for this district.'),
+    });
+  }
+
+  assignComplaint() {
+    const assigneeId = this.selectedAssigneeId();
+    if (!assigneeId) { this.toast.error('Please select an assignee.'); return; }
+    this.actionLoading.set(true);
+    this.complaintSvc.assignComplaint(this.id, assigneeId).subscribe({
+      next: c  => { this.complaint.set(c); this.actionLoading.set(false); this.showAssignCard.set(false); this.toast.success('Complaint assigned successfully.'); },
+      error: e => { this.actionLoading.set(false); this.toast.error(e.error?.message ?? 'Failed to assign complaint.'); },
+    });
+  }
+
   startComplaint() {
     this.actionLoading.set(true);
     this.complaintSvc.startComplaint(this.id).subscribe({

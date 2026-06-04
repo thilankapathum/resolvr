@@ -488,7 +488,53 @@
                     <span
                       class="badge badge-neutral badge-outline text-xs h-4 border-neutral/50">{{ getRoleLabel(complaint()!.assignedToRole) }}</span>
                   }
+                  @if (canAssign() && !showAssignCard()) {
+                    <button class="btn btn-outline border-neutral/50 text-neutral btn-neutral btn-xs" (click)="openAssignDialog()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 19C15 16.7909 12.3137 15 9 15C5.68629 15 3 16.7909 3 19M19 16V13M19 13V10M19 13H16M19 13H22M9 12C6.79086 12 5 10.2091 5 8C5 5.79086 6.79086 4 9 4C11.2091 4 13 5.79086 13 8C13 10.2091 11.2091 12 9 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      {{ complaint()!.status === 'NOT_ASSIGNED' ? 'Assign' : 'Reassign' }}
+                    </button>
+                  }
                 </div>
+
+                @if (showAssignCard()) {
+                  <div class="card bg-base-100 border border-base-300 rounded-md p-4 mt-2">
+                    <p class="text-xs text-base-content/60 mb-4">
+                      Select a Technical Officer or Engineer from <strong>{{ complaint()!.districtName }}</strong> to handle this complaint.
+                    </p>
+
+                    @if (availableAssignees_assign().length === 0) {
+                      <div class="alert alert-warning">
+                        <span class="text-sm">No Technical Officers or Engineers are assigned to {{ complaint()!.districtName }}. Contact your administrator.</span>
+                      </div>
+                    } @else {
+                      <div class="form-control mb-4">
+                        <label class="label"><span class="label-text font-medium text-sm">Assign to *</span></label>
+                        <select class="select select-bordered w-full select-xs" (change)="selectedAssigneeId.set(+($any($event.target).value))">
+                          <option value="">Select assignee...</option>
+                          @for (u of availableAssignees_assign(); track u.id) {
+                            <option [value]="u.id">{{ u.fullName }} ({{ getRoleLabel(u.role) }})</option>
+                          }
+                        </select>
+                      </div>
+                    }
+
+                    <div class="flex flex-row">
+                      <button class="btn btn-ghost btn-xs" (click)="showAssignCard.set(false)">Cancel</button>
+                      @if (availableAssignees_assign().length > 0) {
+                        <button class="btn btn-primary btn-xs ml-auto" [disabled]="!selectedAssigneeId() || actionLoading()"
+                                (click)="assignComplaint()">
+                          @if (actionLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                          } {{ complaint()!.status === 'NOT_ASSIGNED' ? 'Assign' : 'Reassign' }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <div class="modal-backdrop" (click)="showAssignCard.set(false)"></div>
+
+                }
               </li>
 
               <li class="flex flex-col gap-1">
@@ -515,8 +561,8 @@
 
               <li
                 class="flex justify-between items-center p-3 rounded-lg border border-base-300"
-                [class.bg-error]="isPastTarget()" [class.border-error]="isPastTarget()"
-                [class.text-error-content]="isPastTarget()">
+                [class.border-error]="isPastTarget()"
+                [class.text-error]="isPastTarget()">
                 <div class="flex flex-col">
                   <span class="text-xs font-semibold uppercase tracking-wider"
                         [class.text-base-content-50]="!isPastTarget()" [class.opacity-90]="isPastTarget()">SLA Target Date</span>

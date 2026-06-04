@@ -170,7 +170,7 @@ public class ComplaintService {
         Complaint complaint = getComplaint(complaintId);
         User currentUser = getUser(actor.getId());
 
-        validateIsAssignee(complaint, currentUser);
+        validateCanContribute(complaint, currentUser);
         validateStatusForAnalysis(complaint);
 
         // Update serving site / coverage fields if provided (these are complaint-level fields)
@@ -242,7 +242,7 @@ public class ComplaintService {
         Complaint complaint = getComplaint(complaintId);
         User currentUser = getUser(actor.getId());
 
-        validateIsAssignee(complaint, currentUser);
+        validateCanContribute(complaint, currentUser);
         validateStatusForSolution(complaint);
 
         // Must have at least one analysis entry
@@ -539,6 +539,42 @@ public class ComplaintService {
                 || !complaint.getAssignedTo().getId().equals(user.getId())) {
             throw new ForbiddenException("You are not the assigned owner of this complaint.");
         }
+    }
+
+    /**
+     * For adding analysis/solution entries: the current assignee is always allowed.
+     * Additionally, when the complaint is IN_PROGRESS or ESCALATED_TO_ENGINEER, any
+     * active Technical Officer or Engineer belonging to the complaint's district may
+     * also contribute.
+     */
+    private void validateCanContribute(Complaint complaint, User user) {
+        // Assignee always allowed (covers all active statuses)
+        if (complaint.getAssignedTo() != null
+                && complaint.getAssignedTo().getId().equals(user.getId())) {
+            return;
+        }
+
+        // For in-progress complaints, any TO/Engineer in the district may contribute
+        ComplaintStatus status = complaint.getStatus();
+        if (status == ComplaintStatus.IN_PROGRESS
+                || status == ComplaintStatus.ESCALATED_TO_ENGINEER) {
+            if (user.getRole() != UserRole.TECHNICAL_OFFICER
+                    && user.getRole() != UserRole.ENGINEER) {
+                throw new ForbiddenException("Only Technical Officers or Engineers can contribute to this complaint.");
+            }
+            if (!user.isActive()) {
+                throw new ForbiddenException("Your account is inactive.");
+            }
+            boolean isInDistrict = user.getDistricts().stream()
+                    .anyMatch(d -> d.getId().equals(complaint.getDistrict().getId()));
+            if (!isInDistrict) {
+                throw new ForbiddenException(
+                        "You are not assigned to the district of this complaint.");
+            }
+            return;
+        }
+
+        throw new ForbiddenException("You are not the assigned owner of this complaint.");
     }
 
     private void validateAssignee(User assignee, District district) {

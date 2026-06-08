@@ -368,6 +368,13 @@
                       </div>
                     </div>
                     <p class="text-sm font-medium leading-relaxed">{{ entry.content }}</p>
+                  <app-attachment-panel-component
+                    entryType="ANALYSIS"
+                    [complaintId]="complaint()!.id"
+                    [entryId]="entry.id"
+                    [initialAttachments]="entry.attachments"
+                    [canUpload]="canContribute()"
+                  ></app-attachment-panel-component>
                   </div>
                 }
               </div>

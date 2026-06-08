@@ -32,6 +32,7 @@ public class ComplaintService {
     private final AuditLogRepository auditLogRepository;
     private final AnalysisEntryRepository analysisEntryRepository;
     private final SolutionEntryRepository solutionEntryRepository;
+    private final AttachmentService attachmentService;
 
     // ── Create ───────────────────────────────────────────────────
 
@@ -134,7 +135,8 @@ public class ComplaintService {
                 .notes("Assigned to " + assignee.getFullName())
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
     }
 
     // ── Start ────────────────────────────────────────────────────
@@ -159,7 +161,9 @@ public class ComplaintService {
                 .fromStatus(ComplaintStatus.NOT_STARTED).toStatus(ComplaintStatus.IN_PROGRESS)
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Add Analysis ─────────────────────────────────────────────
@@ -190,7 +194,9 @@ public class ComplaintService {
                 .action(AuditAction.ANALYSIS_ADDED)
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     @Transactional
@@ -231,7 +237,9 @@ public class ComplaintService {
                 .action(AuditAction.ANALYSIS_EDITED)
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Add Solution ─────────────────────────────────────────────
@@ -265,7 +273,9 @@ public class ComplaintService {
                 .action(AuditAction.SOLUTION_ADDED)
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     @Transactional
@@ -305,7 +315,9 @@ public class ComplaintService {
                 .action(AuditAction.SOLUTION_EDITED)
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Escalate ─────────────────────────────────────────────────
@@ -349,7 +361,9 @@ public class ComplaintService {
                         + (request.notes() != null ? " — " + request.notes() : ""))
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Mark Resolved ────────────────────────────────────────────
@@ -389,7 +403,9 @@ public class ComplaintService {
                         + (request.notes() != null ? request.notes() : ""))
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Manager: Close / Reopen ──────────────────────────────────
@@ -420,7 +436,9 @@ public class ComplaintService {
                 .notes(request.notes())
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     @Transactional
@@ -453,13 +471,17 @@ public class ComplaintService {
                 .notes("Re-assigned to " + assignee.getFullName() + ". Reason: " + request.notes())
                 .build());
 
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     // ── Queries ──────────────────────────────────────────────────
 
     public ComplaintResponse getComplaintDetail(Long complaintId) {
-        return ComplaintResponse.from(reload(complaintId));
+//        return ComplaintResponse.from(reload(complaintId));
+        return toDetailResponse(reload(complaintId));
+
     }
 
     public Page<ComplaintResponse> getComplaintsForUser(
@@ -475,24 +497,22 @@ public class ComplaintService {
         if (statusStr != null && !statusStr.isBlank()) {
             try {
                 status = ComplaintStatus.valueOf(statusStr.toUpperCase());
-            } catch (IllegalArgumentException ignored) {}
+            } catch (IllegalArgumentException ignored) {
+            }
         }
 
         // Normalize search
         String searchTerm = (search != null && !search.isBlank()) ? search.trim() : null;
 
         return switch (user.getRole()) {
-            case TECHNICAL_OFFICER, ENGINEER ->
-                    complaintRepository.findAllInUserDistrictsFiltered(
-                                    user.getId(), status, searchTerm, pageable)
-                            .map(ComplaintResponse::summary);
-            case MANAGER ->
-                    complaintRepository.findByRegionFiltered(
-                                    user.getRegion().getId(), status, searchTerm, pageable)
-                            .map(ComplaintResponse::summary);
-            case HEAD, ADMIN ->
-                    complaintRepository.findAllFiltered(status, searchTerm, pageable)
-                            .map(ComplaintResponse::summary);
+            case TECHNICAL_OFFICER, ENGINEER -> complaintRepository.findAllInUserDistrictsFiltered(
+                            user.getId(), status, searchTerm, pageable)
+                    .map(ComplaintResponse::summary);
+            case MANAGER -> complaintRepository.findByRegionFiltered(
+                            user.getRegion().getId(), status, searchTerm, pageable)
+                    .map(ComplaintResponse::summary);
+            case HEAD, ADMIN -> complaintRepository.findAllFiltered(status, searchTerm, pageable)
+                    .map(ComplaintResponse::summary);
         };
     }
 
@@ -523,12 +543,10 @@ public class ComplaintService {
                 // Dashboard: only complaints assigned to this user
                     complaintRepository.findRelevantForUser(user.getId(), pageable)
                             .map(ComplaintResponse::summary);
-            case MANAGER ->
-                    complaintRepository.findByRegionIdAndStatus(
-                                    user.getRegion().getId(), ComplaintStatus.IN_PROGRESS, pageable)
-                            .map(ComplaintResponse::summary);
-            case HEAD, ADMIN ->
-                    complaintRepository.findAll(pageable).map(ComplaintResponse::summary);
+            case MANAGER -> complaintRepository.findByRegionIdAndStatus(
+                            user.getRegion().getId(), ComplaintStatus.IN_PROGRESS, pageable)
+                    .map(ComplaintResponse::summary);
+            case HEAD, ADMIN -> complaintRepository.findAll(pageable).map(ComplaintResponse::summary);
         };
     }
 
@@ -640,7 +658,20 @@ public class ComplaintService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
 
+//    private Complaint reload(Long id) {
+//        return complaintRepository.findById(id).orElseThrow();
+//    }
+
     private Complaint reload(Long id) {
-        return complaintRepository.findById(id).orElseThrow();
+        return complaintRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
+    }
+
+    private ComplaintResponse toDetailResponse(Complaint c) {
+        return ComplaintResponse.from(
+                c,
+                entryId -> attachmentService.listForEntry("ANALYSIS", entryId),
+                entryId -> attachmentService.listForEntry("SOLUTION", entryId)
+        );
     }
 }

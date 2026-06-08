@@ -17,6 +17,7 @@ import {LoadingSpinnerComponent} from '../../../shared/loading-spinner-component
 import {StatusBadgeComponent} from '../../../shared/status-badge-component/status-badge-component';
 import {PriorityBadgeComponent} from '../../../shared/priority-badge-component/priority-badge-component';
 import {UserService} from '../../admin/user-service';
+import {AttachmentPanelComponent} from '../../../shared/attachment-panel-component/attachment-panel-component';
 
 @Component({
   selector: 'app-complaint-detail-component',
@@ -27,7 +28,8 @@ import {UserService} from '../../admin/user-service';
     LoadingSpinnerComponent,
     RouterLink,
     StatusBadgeComponent,
-    PriorityBadgeComponent
+    PriorityBadgeComponent,
+    AttachmentPanelComponent
   ],
   templateUrl: './complaint-detail-component.html',
   styleUrl: './complaint-detail-component.css',

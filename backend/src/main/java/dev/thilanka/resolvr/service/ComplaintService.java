@@ -484,6 +484,10 @@ public class ComplaintService {
 
     }
 
+    public List<String> getRaiserSuggestions(String q) {
+        return complaintRepository.findRaiserSuggestions(q);
+    }
+
     public Page<ComplaintResponse> getComplaintsForUser(
             UserDetailsImpl actor,
             String statusStr,

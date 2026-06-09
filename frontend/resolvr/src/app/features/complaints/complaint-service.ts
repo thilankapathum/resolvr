@@ -30,6 +30,10 @@ export class ComplaintService {
     return this.http.post<ComplaintResponse>(this.api, payload);
   }
 
+  getRaiserSuggestions(q: string) {
+    return this.http.get<string[]>(`${this.api}/raisers`, { params: { q } });
+  }
+
   assignComplaint(id: number, assignedToId: number) {
     return this.http.post<ComplaintResponse>(`${this.api}/${id}/assign`, { assignedToId });
   }

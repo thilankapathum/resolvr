@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/complaints")
 @RequiredArgsConstructor
@@ -30,6 +32,20 @@ public class ComplaintController {
 //            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
 //        return ResponseEntity.ok(complaintService.getComplaintsForUser(currentUser, pageable));
 //    }
+
+    // ── Raiser Autocomplete ──────────────────────────────────────
+
+    /**
+     * Returns up to 10 distinct raisedBy names matching the query.
+     * Used by the complaint form to prevent name typos for repeat raisers.
+     * Minimum query length of 2 chars enforced to avoid returning the full dataset.
+     */
+    @GetMapping("/raisers")
+    public ResponseEntity<List<String>> getRaiserSuggestions(
+            @RequestParam(defaultValue = "") String q) {
+        if (q.trim().length() < 2) return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(complaintService.getRaiserSuggestions(q.trim()));
+    }
 
     @GetMapping
     public ResponseEntity<Page<ComplaintResponse>> getComplaints(

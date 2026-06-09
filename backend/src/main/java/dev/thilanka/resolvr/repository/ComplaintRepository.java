@@ -146,4 +146,17 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long>,
             @Param("search") String search,
             Pageable pageable
     );
+
+    /**
+     * Returns up to 10 distinct raisedBy names that contain the query string
+     * (case-insensitive). Used for the autocomplete on the complaint form.
+     */
+    @Query("""
+            SELECT DISTINCT c.raisedBy FROM Complaint c
+            WHERE LOWER(c.raisedBy) LIKE LOWER(CONCAT('%', :q, '%'))
+            ORDER BY c.raisedBy ASC
+            LIMIT 10
+            """
+    )
+    List<String> findRaiserSuggestions(@Param("q") String q);
 }

@@ -7,24 +7,22 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Function;
 
 public record ComplaintResponse(
         Long id,
         String refNumber,
 
-        // District / Region
         Long districtId,
         String districtName,
         String districtCode,
         Long regionId,
         String regionName,
 
-        // Status & Priority
         ComplaintStatus status,
         ComplaintPriority priority,
         LocalDateTime targetDate,
 
-        // Ownership
         Long createdById,
         String createdByName,
         Long assignedToId,
@@ -32,7 +30,6 @@ public record ComplaintResponse(
         String assignedToRole,
         String raisedBy,
 
-        // Customer
         String customerName,
         String contactNumber,
         String msisdns,
@@ -46,37 +43,42 @@ public record ComplaintResponse(
         TechnologyType technology,
         String additionalInfo,
 
-        // Device
         DeviceType deviceType,
         Short signalBars,
         Boolean usingVpnApn,
 
-        // Analysis overview fields
         String servingSitesCells,
         String coverageQuality,
 
-        // Customer feedback
         boolean customerFeedbackTaken,
 
-        // Threads (for detail view)
         List<AnalysisEntryResponse> analysisEntries,
         List<SolutionEntryResponse> solutionEntries,
         List<AuditLogResponse> auditLogs,
 
-        // Timestamps
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         LocalDateTime resolvedAt,
         LocalDateTime closedAt
 ) {
-    public static ComplaintResponse from(Complaint c) {
+    /**
+     * Full detail view — includes analysis and solution entries with their attachments.
+     *
+     * @param attachmentsForEntry function that returns List<AttachmentResponse> for
+     *                            a given (entryType, entryId) pair. Supplied by
+     *                            ComplaintService which has access to AttachmentService.
+     *                            e.g.: (type, id) -> attachmentService.listForEntry(type, id)
+     */
+    public static ComplaintResponse from(
+            Complaint c,
+            Function<Long, List<AttachmentResponse>> analysisAttachments,
+            Function<Long, List<AttachmentResponse>> solutionAttachments) {
+
         return new ComplaintResponse(
                 c.getId(), c.getRefNumber(),
 
-                c.getDistrict().getId(),
-                c.getDistrict().getName(),
-                c.getDistrict().getCode(),
-                c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getId() : null,
+                c.getDistrict().getId(), c.getDistrict().getName(), c.getDistrict().getCode(),
+                c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getId()   : null,
                 c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getName() : null,
 
                 c.getStatus(), c.getPriority(), c.getTargetDate(),
@@ -100,20 +102,32 @@ public record ComplaintResponse(
 
                 c.isCustomerFeedbackTaken(),
 
-                c.getAnalysisEntries().stream().map(AnalysisEntryResponse::from).toList(),
-                c.getSolutionEntries().stream().map(SolutionEntryResponse::from).toList(),
+                c.getAnalysisEntries().stream()
+                        .map(e -> AnalysisEntryResponse.from(e, analysisAttachments.apply(e.getId())))
+                        .toList(),
+                c.getSolutionEntries().stream()
+                        .map(e -> SolutionEntryResponse.from(e, solutionAttachments.apply(e.getId())))
+                        .toList(),
                 c.getAuditLogs().stream().map(AuditLogResponse::from).toList(),
 
                 c.getCreatedAt(), c.getUpdatedAt(), c.getResolvedAt(), c.getClosedAt()
         );
     }
 
-    /** Summary version without threads — for list views */
+    /**
+     * Convenience overload for backwards-compatibility — no attachments.
+     * Used by list/summary views where attachments are not needed.
+     */
+    public static ComplaintResponse from(Complaint c) {
+        return from(c, id -> List.of(), id -> List.of());
+    }
+
+    /** Summary version for list views — no threads, no attachments. */
     public static ComplaintResponse summary(Complaint c) {
         return new ComplaintResponse(
                 c.getId(), c.getRefNumber(),
                 c.getDistrict().getId(), c.getDistrict().getName(), c.getDistrict().getCode(),
-                c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getId() : null,
+                c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getId()   : null,
                 c.getDistrict().getRegion() != null ? c.getDistrict().getRegion().getName() : null,
                 c.getStatus(), c.getPriority(), c.getTargetDate(),
                 c.getCreatedBy().getId(), c.getCreatedBy().getFullName(),

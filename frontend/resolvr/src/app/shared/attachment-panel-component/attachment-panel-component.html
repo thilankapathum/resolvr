@@ -1,0 +1,282 @@
+<!-- ── Attachment Panel ──────────────────────────────────────────────────── -->
+<div class="mt-3">
+
+  <!-- ── Media thumbnail grid (images + videos) ────────────────────────── -->
+  @if (mediaItems().length > 0) {
+    <div class="flex flex-wrap gap-2 mt-1">
+      @for (att of mediaItems(); track att.id; let i = $index) {
+        <div class="relative group rounded-md overflow-hidden border border-base-300 bg-base-200 cursor-pointer"
+             style="width:80px; height:80px; flex-shrink:0;"
+             (click)="openGallery(att)">
+
+          <!-- Image thumbnail -->
+          @if (isImage(att)) {
+            <img [src]="att.url"
+                 [alt]="att.originalName"
+                 class="w-full h-full object-cover"
+                 loading="lazy"/>
+          }
+
+          <!-- Video thumbnail -->
+          @if (isVideo(att)) {
+            <div class="w-full h-full flex flex-col items-center justify-center bg-base-300">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" class="text-base-content/50">
+                <path d="M15.2 3.6H8.8C5.612 3.6 3 6.212 3 9.4V14.6C3 17.788 5.612 20.4 8.8 20.4H15.2C18.388 20.4 21 17.788 21 14.6V9.4C21 6.212 18.388 3.6 15.2 3.6Z"
+                      stroke="currentColor" stroke-width="1.5"/>
+                <path d="M10 9L15 12L10 15V9Z" fill="currentColor"/>
+              </svg>
+              <span class="text-[9px] text-base-content/40 mt-1 truncate px-1 w-full text-center">
+                {{ att.originalName }}
+              </span>
+            </div>
+          }
+
+          <!-- Hover overlay -->
+          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all
+                      flex flex-col justify-between p-1
+                      pointer-events-none group-hover:pointer-events-auto">
+
+            <!-- Expand icon (centre) -->
+            <div class="absolute inset-0 flex items-center justify-center
+                        opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white drop-shadow">
+                <path d="M15 3H21V9M9 21H3V15M21 3L14 10M3 21L10 14"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <!-- File size badge (top right) -->
+            <span class="text-[9px] text-white font-mono bg-black/50 rounded px-1
+                         self-end leading-tight opacity-0 group-hover:opacity-100 transition-opacity">
+              {{ formatBytes(att.fileSizeBytes) }}
+            </span>
+
+            <!-- Delete button (bottom right) -->
+            @if (canUpload()) {
+              <button class="btn btn-error btn-xs self-end opacity-0 group-hover:opacity-100 transition-opacity"
+                      (click)="deleteAttachment(att, $event)"
+                      title="Delete">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6H21M8 6V4H16V6M19 6L18.2 19.1C18.1 19.6 17.6 20 17.1 20H6.9C6.4 20 5.9 19.6 5.8 19.1L5 6"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Document / non-media chips ───────────────────────────────────── -->
+  @if (docItems().length > 0) {
+    <div class="flex flex-wrap gap-1.5 mt-2">
+      @for (att of docItems(); track att.id) {
+        <div class="flex items-center gap-1.5 group
+                    border border-base-300 bg-base-100 rounded px-2 py-1
+                    text-xs text-base-content/60 hover:text-base-content hover:border-base-content/25
+                    transition-colors max-w-48">
+
+          @if (docIcon(att) === 'pdf') {
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-error/60 shrink-0">
+              <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 2V8H20M9 15H15M9 18H15M9 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          } @else {
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-info/60 shrink-0">
+              <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          }
+
+          <span class="truncate flex-1">{{ att.originalName }}</span>
+
+          <!-- Download -->
+          <a [href]="att.url"
+             [download]="att.originalName"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+             title="Download"
+             (click)="$event.stopPropagation()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15M7 10L12 15L17 10M12 15V3"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+
+          @if (canUpload()) {
+            <button class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-error/60 hover:text-error"
+                    (click)="deleteAttachment(att, $event)"
+                    title="Delete">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6H21M8 6V4H16V6M19 6L18.2 19.1C18.1 19.6 17.6 20 17.1 20H6.9C6.4 20 5.9 19.6 5.8 19.1L5 6"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Upload trigger ────────────────────────────────────────────────── -->
+  @if (canUpload()) {
+    <div class="mt-2">
+      <label class="flex items-center gap-1.5 w-fit cursor-pointer">
+        <input type="file"
+               class="hidden"
+               accept="image/*,video/mp4,video/webm,video/quicktime,video/x-msvideo,application/pdf,.doc,.docx,.txt"
+               (change)="onFilePicked($event)"
+               [disabled]="uploading()"/>
+        @if (!uploading()) {
+          <span class="flex items-center gap-1 text-xs text-base-content/40
+                       hover:text-base-content/70 transition-colors
+                       border border-dashed border-base-300 hover:border-base-content/25
+                       rounded px-2 py-1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15M17 8L12 3L7 8M12 3V15"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Attach file
+          </span>
+        } @else {
+          <span class="flex items-center gap-1.5 text-xs text-base-content/40">
+            <span class="loading loading-spinner loading-xs"></span>
+            Uploading…
+          </span>
+        }
+      </label>
+      <p class="text-[10px] text-base-content/25 mt-0.5 ml-0.5">
+        Images, videos, PDF, DOC · max 100 MB
+      </p>
+    </div>
+  }
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     GALLERY LIGHTBOX
+     ════════════════════════════════════════════════════════════════════════ -->
+@if (galleryOpen() && currentItem()) {
+  <div class="fixed inset-0 z-[9999] flex flex-col select-none"
+       style="background: rgba(0, 0, 0, 0.8);"
+       (click)="closeGallery()">
+
+    <!-- ── Top bar ─────────────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between px-4 pt-4 pb-2 shrink-0"
+         (click)="$event.stopPropagation()">
+
+      <span class="text-white/40 text-xs font-mono w-16 shrink-0">
+        {{ galleryIndex() + 1 }}&nbsp;/&nbsp;{{ mediaItems().length }}
+      </span>
+
+      <span class="text-white/70 text-sm truncate max-w-xs sm:max-w-md text-center flex-1 mx-4">
+        {{ currentItem()!.originalName }}
+      </span>
+
+      <div class="flex items-center gap-2 w-max shrink-0">
+        <a [href]="currentItem()!.url"
+           [download]="currentItem()!.originalName"
+           class="btn btn-xs btn-ghost text-white/50 hover:text-white border border-white/15"
+           (click)="$event.stopPropagation()"
+           title="Download">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15M7 10L12 15L17 10M12 15V3"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download
+        </a>
+        <button class="btn btn-xs btn-ghost text-white/50 hover:text-white border border-white/15"
+                (click)="closeGallery()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Main viewer ─────────────────────────────────────────────────── -->
+    <div class="flex-1 flex items-center justify-center relative min-h-0 px-14"
+         (click)="$event.stopPropagation()">
+
+      <!-- Prev -->
+      @if (mediaItems().length > 1) {
+        <button class="absolute left-2 top-1/2 -translate-y-1/2 z-10
+                       w-10 h-10 rounded-full bg-white/10 hover:bg-white/25
+                       flex items-center justify-center transition-colors"
+                (click)="prev()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      }
+
+      <!-- Image -->
+      @if (isImage(currentItem()!)) {
+        <img [src]="currentItem()!.url"
+             [alt]="currentItem()!.originalName"
+             class="max-w-full object-contain rounded"
+             style="max-height: calc(100vh - 176px)"
+             draggable="false"/>
+      }
+
+      <!-- Video -->
+      @if (isVideo(currentItem()!)) {
+        <video [src]="currentItem()!.url"
+               controls
+               class="max-w-full rounded bg-black"
+               style="max-height: calc(100vh - 176px)">
+          Your browser does not support the video tag.
+        </video>
+      }
+
+      <!-- Next -->
+      @if (mediaItems().length > 1) {
+        <button class="absolute right-2 top-1/2 -translate-y-1/2 z-10
+                       w-10 h-10 rounded-full bg-white/10 hover:bg-white/25
+                       flex items-center justify-center transition-colors"
+                (click)="next()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    <!-- ── Thumbnail strip ─────────────────────────────────────────────── -->
+    @if (mediaItems().length > 1) {
+      <div class="shrink-0 flex items-center justify-center gap-2 px-4 py-3 overflow-x-auto"
+           (click)="$event.stopPropagation()">
+        @for (att of mediaItems(); track att.id; let i = $index) {
+          <button class="rounded overflow-hidden shrink-0 border-2 transition-all"
+                  style="width:52px; height:52px;"
+                  [class.border-white]="i === galleryIndex()"
+                  [class.border-transparent]="i !== galleryIndex()"
+                  [class.opacity-40]="i !== galleryIndex()"
+                  (click)="goTo(i)">
+            @if (isImage(att)) {
+              <img [src]="att.url" [alt]="att.originalName"
+                   class="w-full h-full object-cover" loading="lazy" draggable="false"/>
+            } @else {
+              <div class="w-full h-full flex items-center justify-center bg-white/10">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white/70">
+                  <path d="M10 9L15 12L10 15V9Z" fill="currentColor"/>
+                  <path d="M15.2 3.6H8.8C5.612 3.6 3 6.212 3 9.4V14.6C3 17.788 5.612 20.4 8.8 20.4H15.2C18.388 20.4 21 17.788 21 14.6V9.4C21 6.212 18.388 3.6 15.2 3.6Z"
+                        stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+            }
+          </button>
+        }
+      </div>
+    }
+
+  </div>
+}

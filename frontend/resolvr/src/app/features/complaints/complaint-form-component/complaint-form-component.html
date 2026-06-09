@@ -44,10 +44,37 @@
 
             <div class="form-control">
               <label class="label"><span class="label-text font-medium">Raised By <span class="text-error">*</span></span></label>
-              <input type="text" formControlName="raisedBy"
-                     placeholder="Company employee who raised the complaint"
-                     class="input input-bordered input-sm w-full bg-warning/5"
-                     [class.input-error]="isInvalid('raisedBy')" />
+              <div class="relative">
+                <input type="text" formControlName="raisedBy"
+                       placeholder="Company employee who raised the complaint"
+                       class="input input-bordered input-sm w-full bg-warning/5"
+                       [class.input-error]="isInvalid('raisedBy')"
+                       autocomplete="off"
+                       (input)="onRaiserInput($event)"
+                       (blur)="hideRaiserDropdown()" />
+
+                @if (showRaiserDropdown() && raiserSuggestions().length > 0) {
+                  <ul class="absolute z-50 left-0 right-0 top-full mt-1
+                              bg-base-100 border border-base-300 rounded-lg
+                              shadow-lg overflow-hidden">
+                    @for (name of raiserSuggestions(); track name) {
+                      <li>
+                        <button type="button"
+                                class="flex items-center gap-2 w-full px-3 py-2 text-sm text-left
+                                       hover:bg-base-200 transition-colors"
+                                (mousedown)="selectRaiser(name)">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                               class="text-base-content/30 shrink-0">
+                            <path d="M20 21C20 18.2386 16.4183 16 12 16C7.58172 16 4 18.2386 4 21M12 13C9.23858 13 7 10.7614 7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8C17 10.7614 14.7614 13 12 13Z"
+                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                          {{ name }}
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
               @if (isInvalid('raisedBy')) {
                 <label class="label"><span class="label-text-alt text-error">Required.</span></label>
               }

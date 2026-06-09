@@ -8,6 +8,7 @@ import {ToastService} from '../../../shared/toast-service';
 import {DistrictResponse, UserResponse, ROLE_LABELS} from '../../../core/models/models';
 import {PageHeaderComponent} from '../../../shared/page-header-component/page-header-component';
 import {UserService} from '../../admin/user-service';
+import {debounceTime, distinctUntilChanged, of, Subject, switchMap} from 'rxjs';
 
 @Component({
   selector: 'app-complaint-form-component',
@@ -37,6 +38,11 @@ export class ComplaintFormComponent implements OnInit {
   districts      = signal<DistrictResponse[]>([]);
   assignableUsers = signal<UserResponse[]>([]);
   sameAsContact = signal(false);
+
+  // ── Raiser autocomplete ────────────────────────────────────────
+  raiserSuggestions = signal<string[]>([]);
+  showRaiserDropdown = signal(false);
+  private raiserInput$ = new Subject<string>();
 
   form = this.fb.group({
     // General
@@ -72,6 +78,16 @@ export class ComplaintFormComponent implements OnInit {
       error: err => console.error(err),
     });
 
+    // Raiser autocomplete — debounced to avoid firing on every keystroke
+    this.raiserInput$.pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      switchMap(q => q.length >= 2 ? this.complaintSvc.getRaiserSuggestions(q) : of([]))
+    ).subscribe(suggestions => {
+      this.raiserSuggestions.set(suggestions);
+      this.showRaiserDropdown.set(suggestions.length > 0);
+    });
+
     // Reload assigners when district changes
     this.form.get('districtId')?.valueChanges.subscribe(districtId => {
       const id = districtId ? Number(districtId) : 0;
@@ -91,6 +107,27 @@ export class ComplaintFormComponent implements OnInit {
         this.form.get('msisdns')?.setValue(value ?? '', { emitEvent: false });
       }
     });
+  }
+
+  // ── Raiser autocomplete handlers ──────────────────────────────
+  onRaiserInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.raiserInput$.next(value);
+    if (value.length < 2) {
+      this.raiserSuggestions.set([]);
+      this.showRaiserDropdown.set(false);
+    }
+  }
+
+  selectRaiser(name: string) {
+    this.form.patchValue({ raisedBy: name });
+    this.showRaiserDropdown.set(false);
+    this.raiserSuggestions.set([]);
+  }
+
+  hideRaiserDropdown() {
+    // Small delay so a click on a suggestion registers before the blur fires
+    setTimeout(() => this.showRaiserDropdown.set(false), 150);
   }
 
   isInvalid(field: string) {

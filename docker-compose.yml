@@ -50,6 +50,36 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      minio:
+        condition: service_started
+
+    # ── MinIO object storage ──────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    networks:
+      - private_net    # backend can reach MinIO; frontend cannot
+      - public_net
+    expose:
+      - "9000"         # S3 API — backend only, not exposed to host
+      - "9001"         # Web console — expose only if needed for admin
+    # Access MinIO console from your browser during development:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#      start_period: 15s
 
   # ── Backend (Spring Boot) ────────────────────────────────────
   resolvr-backend:
@@ -116,3 +146,4 @@ networks:
 volumes:
   pgdata:
   pgadmin:
+  minio_data:

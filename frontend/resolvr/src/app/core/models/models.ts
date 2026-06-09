@@ -66,6 +66,19 @@ export interface RegionResponse {
 
 // ── Complaint ─────────────────────────────────────────────────
 
+export interface AttachmentResponse {
+  id: number;
+  entryType: 'ANALYSIS' | 'SOLUTION';
+  entryId: number;
+  originalName: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  createdAt: string;
+  uploadedByName: string;
+  /** Time-limited presigned MinIO URL — use directly in <img>, <video>, <a>. */
+  url: string;
+}
+
 export interface AnalysisEntryResponse {
   id: number;
   content: string;
@@ -75,6 +88,7 @@ export interface AnalysisEntryResponse {
   authorRole: string;
   createdAt: string;
   updatedAt: string;
+  attachments: AttachmentResponse[];
 }
 
 export interface SolutionEntryResponse {
@@ -88,6 +102,7 @@ export interface SolutionEntryResponse {
   authorRole: string;
   createdAt: string;
   updatedAt: string;
+  attachments: AttachmentResponse[];
 }
 
 export interface AuditLogResponse {

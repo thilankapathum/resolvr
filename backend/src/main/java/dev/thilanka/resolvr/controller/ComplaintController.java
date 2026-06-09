@@ -58,9 +58,14 @@ public class ComplaintController {
         );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ComplaintResponse> getComplaint(@PathVariable Long id) {
-        return ResponseEntity.ok(complaintService.getComplaintDetail(id));
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ComplaintResponse> getComplaint(@PathVariable Long id) {
+//        return ResponseEntity.ok(complaintService.getComplaintDetail(id));
+//    }
+
+    @GetMapping("/{refNumber}")
+    public ResponseEntity<ComplaintResponse> getComplaintByRef(@PathVariable String refNumber) {
+        return ResponseEntity.ok(complaintService.getComplaintDetailByRef(refNumber));
     }
 
     // ── Create ───────────────────────────────────────────────────

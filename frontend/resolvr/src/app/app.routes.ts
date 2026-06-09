@@ -72,7 +72,7 @@ export const routes: Routes = [
         title: 'New Complaint — Resolvr'
       },
       {
-        path: 'complaints/:id',
+        path: 'complaints/:refNumber',
         loadComponent: () => import('./features/complaints/complaint-detail-component/complaint-detail-component')
           .then(m => m.ComplaintDetailComponent),
         title: 'Complaint Detail — Resolvr'

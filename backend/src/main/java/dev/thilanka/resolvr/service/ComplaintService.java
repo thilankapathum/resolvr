@@ -471,7 +471,6 @@ public class ComplaintService {
                 .notes("Re-assigned to " + assignee.getFullName() + ". Reason: " + request.notes())
                 .build());
 
-//        return ComplaintResponse.from(reload(complaintId));
         return toDetailResponse(reload(complaintId));
 
     }
@@ -479,8 +478,12 @@ public class ComplaintService {
     // ── Queries ──────────────────────────────────────────────────
 
     public ComplaintResponse getComplaintDetail(Long complaintId) {
-//        return ComplaintResponse.from(reload(complaintId));
         return toDetailResponse(reload(complaintId));
+
+    }
+
+    public ComplaintResponse getComplaintDetailByRef(String refNumber) {
+        return toDetailResponse(reloadByRef(refNumber));
 
     }
 
@@ -670,6 +673,13 @@ public class ComplaintService {
         return complaintRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
     }
+
+    private Complaint reloadByRef(String refNumber) {
+        return complaintRepository.findByRefNumber(refNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
+    }
+
+
 
     private ComplaintResponse toDetailResponse(Complaint c) {
         return ComplaintResponse.from(

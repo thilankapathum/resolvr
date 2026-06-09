@@ -129,8 +129,8 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     this.load();
   }
 
-  navigateTo(id: number) {
-    this.router.navigate(['/app/complaints', id]);
+  navigateTo(refNumber: string) {
+    this.router.navigate(['/app/complaints', refNumber]);
   }
 
   isPastTarget(targetDate: string) {

@@ -98,13 +98,14 @@ export class ComplaintDetailComponent {
   });
 
   ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadComplaint(id);
+    // const id = Number(this.route.snapshot.paramMap.get('id'));
+    const refNumber = this.route.snapshot.paramMap.get('refNumber');
+    this.loadComplaint(refNumber!);
   }
 
-  loadComplaint(id: number) {
+  loadComplaint(refNumber: string) {
     this.loading.set(true);
-    this.complaintSvc.getComplaint(id).subscribe({
+    this.complaintSvc.getComplaintByRef(refNumber).subscribe({
       next: c => { this.complaint.set(c); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.error('Failed to load complaint.'); },
     });

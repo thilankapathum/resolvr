@@ -22,8 +22,12 @@ export class ComplaintService {
     return this.http.get<Page<ComplaintResponse>>(this.api, { params });
   }
 
-  getComplaint(id: number) {
-    return this.http.get<ComplaintResponse>(`${this.api}/${id}`);
+  // getComplaint(id: number) {
+  //   return this.http.get<ComplaintResponse>(`${this.api}/${id}`);
+  // }
+
+  getComplaintByRef(refNumber: string) {
+    return this.http.get<ComplaintResponse>(`${this.api}/${refNumber}`);
   }
 
   createComplaint(payload: any) {

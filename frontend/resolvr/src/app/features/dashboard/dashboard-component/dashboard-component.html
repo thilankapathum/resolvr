@@ -49,7 +49,7 @@
             </thead>
             <tbody>
               @for (c of recentComplaints(); track c.id) {
-                <tr class="hover cursor-pointer" routerLink="/app/complaints/{{ c.id }}">
+                <tr class="hover cursor-pointer" routerLink="/app/complaints/{{ c.refNumber }}">
                   <td><span class="font-mono text-xs font-bold text-primary">{{ c.refNumber }}</span></td>
                   <td class="text-sm">{{ c.customerName }}</td>
                   <td class="text-sm text-base-content/60">{{ c.districtName }}</td>

@@ -103,7 +103,7 @@
             </thead>
             <tbody>
               @for (c of pagedData()!.content; track c.id) {
-                <tr class="hover cursor-pointer" (click)="navigateTo(c.id)">
+                <tr class="hover cursor-pointer" (click)="navigateTo(c.refNumber)">
                   <td>
                     <span class="font-mono text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{{ c.refNumber }}</span>
                   </td>

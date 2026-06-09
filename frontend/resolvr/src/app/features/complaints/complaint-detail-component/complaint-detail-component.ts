@@ -158,6 +158,9 @@ export class ComplaintDetailComponent {
   canEscalate()    { return this.auth.isTO() && this.isAssignee() && this.complaint()?.status === 'IN_PROGRESS'; }
   canClose()       { return this.auth.isManager() && this.complaint()?.status === 'RESOLVED'; }
   canReopen()      { return this.auth.isManager() && this.complaint()?.status === 'RESOLVED'; }
+  canAttach(userId:number){return this.auth.currentUser()?.id === userId; }
+
+  isUser(userId: number) {return this.auth.currentUser()?.id === userId; }
 
   // ── Actions ───────────────────────────────────────────────────
   openAssignDialog() {

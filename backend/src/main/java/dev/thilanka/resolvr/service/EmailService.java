@@ -78,6 +78,132 @@ public class EmailService {
         sendEmail(to, "Your Resolvr account is now active", body);
     }
 
+    // ── Complaint notifications ────────────────────────────────────────────
+
+    /**
+     * Sent when a complaint is newly assigned to a user (create-with-assignment
+     * or explicit assign/reassign).
+     */
+    @Async
+    public void sendComplaintAssignedEmail(String to, String assigneeName,
+                                           String refNumber, String customerName,
+                                           String district, String issueCategory,
+                                           String assignedBy) {
+        String link = frontendUrl + "/app/complaints/" + refNumber;
+        String body = """
+                Hello %s,
+ 
+                A complaint has been assigned to you on Resolvr.
+ 
+                  Reference  : %s
+                  Customer   : %s
+                  District   : %s
+                  Category   : %s
+                  Assigned by: %s
+ 
+                Please log in to review and start working on this complaint:
+                %s
+ 
+                Regards,
+                The Resolvr Team
+                """.formatted(assigneeName, refNumber, customerName,
+                district, issueCategory, assignedBy, link);
+        sendEmail(to, "[Resolvr] Complaint assigned to you — " + refNumber, body);
+    }
+
+    /**
+     * Sent when a TO escalates a complaint to an engineer.
+     */
+    @Async
+    public void sendComplaintEscalatedEmail(String to, String engineerName,
+                                            String refNumber, String customerName,
+                                            String district, String escalatedBy,
+                                            String notes) {
+        String link = frontendUrl + "/app/complaints/" + refNumber;
+        String notesLine = (notes != null && !notes.isBlank())
+                ? "  Notes      : " + notes + "\n" : "";
+        String body = """
+                Hello %s,
+ 
+                A complaint has been escalated to you for engineering support.
+ 
+                  Reference    : %s
+                  Customer     : %s
+                  District     : %s
+                  Escalated by : %s
+                %s
+                Please log in to review the diagnostic analysis and take over:
+                %s
+ 
+                Regards,
+                The Resolvr Team
+                """.formatted(engineerName, refNumber, customerName,
+                district, escalatedBy, notesLine, link);
+        sendEmail(to, "[Resolvr] Complaint escalated to you — " + refNumber, body);
+    }
+
+    /**
+     * Sent when a manager re-opens a RESOLVED complaint and re-assigns it.
+     */
+    @Async
+    public void sendComplaintReopenedEmail(String to, String assigneeName,
+                                           String refNumber, String customerName,
+                                           String district, String reopenedBy,
+                                           String reason) {
+        String link = frontendUrl + "/app/complaints/" + refNumber;
+        String body = """
+                Hello %s,
+ 
+                A previously resolved complaint has been re-opened and assigned to you.
+ 
+                  Reference   : %s
+                  Customer    : %s
+                  District    : %s
+                  Re-opened by: %s
+                  Reason      : %s
+ 
+                Please log in to review and continue working on this complaint:
+                %s
+ 
+                Regards,
+                The Resolvr Team
+                """.formatted(assigneeName, refNumber, customerName,
+                district, reopenedBy, reason, link);
+        sendEmail(to, "[Resolvr] Complaint re-opened and assigned to you — " + refNumber, body);
+    }
+
+    /**
+     * Sent to ALL active managers when a complaint is marked RESOLVED,
+     * requesting them to review and close it.
+     */
+    @Async
+    public void sendResolutionPendingClosureEmail(String to, String managerName,
+                                                  String refNumber, String customerName,
+                                                  String district, String resolvedBy,
+                                                  String issueCategory) {
+        String link = frontendUrl + "/app/complaints/" + refNumber;
+        String body = """
+                Hello %s,
+ 
+                A complaint has been marked as resolved and is pending your review for closure.
+ 
+                  Reference   : %s
+                  Customer    : %s
+                  District    : %s
+                  Category    : %s
+                  Resolved by : %s
+ 
+                Please log in to review the resolution and either close or re-open the complaint:
+                %s
+ 
+                Regards,
+                The Resolvr Team
+                """.formatted(managerName, refNumber, customerName,
+                district, issueCategory, resolvedBy, link);
+        sendEmail(to, "[Resolvr] Resolution pending closure — " + refNumber, body);
+    }
+
+
     @Async
     public void sendAccountDeactivatedEmail(String to, String name) {
         String body = """

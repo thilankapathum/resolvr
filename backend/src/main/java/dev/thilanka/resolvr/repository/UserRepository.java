@@ -23,6 +23,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRoleAndActiveTrue(UserRole role);
 
+    @Query("SELECT u FROM User u WHERE u.role = 'MANAGER' AND u.active = true AND u.region.id = :regionId")
+    List<User> findActiveManagersByRegionId(@Param("regionId") Long regionId);
+
     @Query("SELECT u FROM User u JOIN u.districts d WHERE d.id = :districtId AND u.role = :role AND u.active = true")
     List<User> findActiveByDistrictAndRole(@Param("districtId") Long districtId, @Param("role") UserRole role);
 

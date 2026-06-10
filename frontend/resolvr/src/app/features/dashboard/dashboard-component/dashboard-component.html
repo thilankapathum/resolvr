@@ -12,7 +12,7 @@
   <!-- Stats row -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     @for (stat of stats(); track stat.label) {
-      <div class="stat bg-base-100 border border-base-300 rounded-xl p-4">
+      <div class="stat bg-neutral-50 border border-base-300 rounded-xl p-4">
         <div class="stat-title text-xs text-base-content/50">{{ stat.label }}</div>
         <div class="stat-value text-2xl font-bold" [class]="stat.colorClass">{{ stat.value }}</div>
       </div>
@@ -20,7 +20,7 @@
   </div>
 
   <!-- Recent complaints -->
-  <div class="card bg-base-100 border border-base-300">
+  <div class="card bg-neutral-50 border border-base-300">
     <div class="card-body p-5">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold">Recent Complaints</h3>

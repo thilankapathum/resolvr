@@ -11,4 +11,5 @@ export class StatusBadgeComponent {
   status = input.required<ComplaintStatus>();
   label    = () => STATUS_LABELS[this.status()];
   badgeClass = () => STATUS_BADGE_CLASS[this.status()];
+  badgeSize = input<'badge-xs' | 'badge-sm' | 'badge-md' | 'badge-lg'>('badge-sm');
 }

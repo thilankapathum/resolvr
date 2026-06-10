@@ -1,7 +1,7 @@
 <div class="card bg-base-100 shadow-xl border border-base-300">
   <div class="card-body">
     <h2 class="card-title text-xl font-bold mb-2">Sign in</h2>
-    <p class="text-base-content/60 text-sm mb-6">Enter your credentials to continue</p>
+<!--    <p class="text-base-content/60 text-sm mb-6">Enter your credentials to continue</p>-->
 
     @if (errorMessage()) {
       <div class="alert alert-error mb-4">
@@ -27,11 +27,11 @@
       <div class="form-control">
         <label class="label">
           <span class="label-text font-medium">Password</span>
-          <a routerLink="/forgot-password" class="label-text-alt link link-primary">Forgot password?</a>
         </label>
         <input type="password" formControlName="password" placeholder="••••••••"
                class="input input-bordered w-full"
                [class.input-error]="form.get('password')?.invalid && form.get('password')?.touched" />
+          <a routerLink="/forgot-password" class="label-text-alt link link-primary mt-2 ml-auto">Forgot password?</a>
       </div>
 
       <button type="submit" class="btn btn-primary w-full mt-2" [disabled]="loading()">

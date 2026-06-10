@@ -33,6 +33,7 @@ public class ComplaintService {
     private final AnalysisEntryRepository analysisEntryRepository;
     private final SolutionEntryRepository solutionEntryRepository;
     private final AttachmentService attachmentService;
+    private final EmailService emailService;
 
     // ── Create ───────────────────────────────────────────────────
 
@@ -102,6 +103,18 @@ public class ComplaintService {
                     .toStatus(ComplaintStatus.NOT_STARTED)
                     .notes("Assigned to " + complaint.getAssignedTo().getFullName())
                     .build());
+
+            // Notify the assignee
+            User assignee = complaint.getAssignedTo();
+            emailService.sendComplaintAssignedEmail(
+                    assignee.getEmail(),
+                    assignee.getFullName(),
+                    complaint.getRefNumber(),
+                    complaint.getCustomerName(),
+                    complaint.getDistrict().getName(),
+                    complaint.getIssueCategory().toString(),
+                    currentUser.getFullName()
+            );
         }
 
         return ComplaintResponse.from(reload(complaint.getId()));
@@ -135,8 +148,17 @@ public class ComplaintService {
                 .notes("Assigned to " + assignee.getFullName())
                 .build());
 
-//        return ComplaintResponse.from(reload(complaintId));
-        return toDetailResponse(reload(complaintId));
+        emailService.sendComplaintAssignedEmail(
+                assignee.getEmail(),
+                assignee.getFullName(),
+                complaint.getRefNumber(),
+                complaint.getCustomerName(),
+                complaint.getDistrict().getName(),
+                complaint.getIssueCategory().toString(),
+                currentUser.getFullName()
+        );
+
+        return ComplaintResponse.from(reload(complaintId));
     }
 
     // ── Start ────────────────────────────────────────────────────
@@ -361,9 +383,17 @@ public class ComplaintService {
                         + (request.notes() != null ? " — " + request.notes() : ""))
                 .build());
 
-//        return ComplaintResponse.from(reload(complaintId));
-        return toDetailResponse(reload(complaintId));
+        emailService.sendComplaintEscalatedEmail(
+                engineer.getEmail(),
+                engineer.getFullName(),
+                complaint.getRefNumber(),
+                complaint.getCustomerName(),
+                complaint.getDistrict().getName(),
+                currentUser.getFullName(),
+                request.notes()
+        );
 
+        return ComplaintResponse.from(reload(complaintId));
     }
 
     // ── Mark Resolved ────────────────────────────────────────────
@@ -403,7 +433,20 @@ public class ComplaintService {
                         + (request.notes() != null ? request.notes() : ""))
                 .build());
 
-//        return ComplaintResponse.from(reload(complaintId));
+        // Notify managers responsible for this complaint's region
+        Long regionId = complaint.getDistrict().getRegion().getId();
+        userRepository.findActiveManagersByRegionId(regionId).forEach(manager ->
+                emailService.sendResolutionPendingClosureEmail(
+                        manager.getEmail(),
+                        manager.getFullName(),
+                        complaint.getRefNumber(),
+                        complaint.getCustomerName(),
+                        complaint.getDistrict().getName(),
+                        currentUser.getFullName(),
+                        complaint.getIssueCategory() != null
+                                ? complaint.getIssueCategory().name() : "—"
+                ));
+
         return toDetailResponse(reload(complaintId));
 
     }
@@ -471,7 +514,16 @@ public class ComplaintService {
                 .notes("Re-assigned to " + assignee.getFullName() + ". Reason: " + request.notes())
                 .build());
 
-//        return ComplaintResponse.from(reload(complaintId));
+        emailService.sendComplaintReopenedEmail(
+                assignee.getEmail(),
+                assignee.getFullName(),
+                complaint.getRefNumber(),
+                complaint.getCustomerName(),
+                complaint.getDistrict().getName(),
+                currentUser.getFullName(),
+                request.notes()
+        );
+
         return toDetailResponse(reload(complaintId));
 
     }
@@ -479,8 +531,12 @@ public class ComplaintService {
     // ── Queries ──────────────────────────────────────────────────
 
     public ComplaintResponse getComplaintDetail(Long complaintId) {
-//        return ComplaintResponse.from(reload(complaintId));
         return toDetailResponse(reload(complaintId));
+
+    }
+
+    public ComplaintResponse getComplaintDetailByRef(String refNumber) {
+        return toDetailResponse(reloadByRef(refNumber));
 
     }
 
@@ -670,6 +726,13 @@ public class ComplaintService {
         return complaintRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
     }
+
+    private Complaint reloadByRef(String refNumber) {
+        return complaintRepository.findByRefNumber(refNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
+    }
+
+
 
     private ComplaintResponse toDetailResponse(Complaint c) {
         return ComplaintResponse.from(

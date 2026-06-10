@@ -168,7 +168,7 @@ export class ComplaintFormComponent implements OnInit {
       next: complaint => {
         this.loading.set(false);
         this.toast.success(`Complaint ${complaint.refNumber} logged successfully.`);
-        this.router.navigate(['/app/complaints', complaint.id]);
+        this.router.navigate(['/app/complaints', complaint.refNumber]);
       },
       error: err => {
         this.loading.set(false);
